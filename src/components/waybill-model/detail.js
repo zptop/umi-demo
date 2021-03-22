@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col, Modal, Tabs, Button, Image } from 'antd';
 import { formatDateYMD, accMul, accDiv } from '../../util/tools';
+import PaymentFlow from './payment-flow';
 const { TabPane } = Tabs;
 import { connect } from 'dva';
 import styles from './index.less';
@@ -9,6 +10,7 @@ const IconFont = createFromIconfontCN({
   scriptUrl: ['//at.alicdn.com/t/font_1595958_p5529b5fjfr.js'],
 });
 const namespace = 'waybill';
+const namespace_user = "user";
 const DescriptionItem = ({ title, content }) => (
   <div className="site-description-item-profile-wrapper">
     <p className="site-description-item-profile-p-label">
@@ -19,8 +21,10 @@ const DescriptionItem = ({ title, content }) => (
 );
 const mapStateToProps = state => {
   let waybillDetailInfo = state[namespace].waybillNoInfo || {};
+  let userInfo = state[namespace_user].userInfo;
   return {
     waybillDetailInfo,
+    userInfo
   };
 };
 
@@ -49,6 +53,11 @@ const Details = props => {
     setIsShowMoreImg(true);
     setShowMoreImgArr(imgArr);
     setImgTitle(title);
+  };
+
+  //支付流水或付款信息，子组件传过来的图片
+  const openPreviewImgFromChild = (src,title)=>{
+    openPreviewImg(src,title);
   };
 
   //渲染多图列表
@@ -126,7 +135,7 @@ const Details = props => {
         <TabPane
           tab={
             <span>
-              <IconFont type="iconjibenxinxi" />
+              <IconFont type="iconjibenxinxi"/>
               基本信息
             </span>
           }
@@ -854,11 +863,13 @@ const Details = props => {
           tab={
             <span>
               <IconFont type="iconjibenxinxi" />
-              付款信息
+              {props.userInfo.PAYMENTREQUIRED != 1?'支付流水':'付款信息'}
             </span>
           }
           key="3"
-        ></TabPane>
+        >
+          <PaymentFlow userInfo={props.userInfo} waybill_no={props.waybill_no} openPreviewImg={openPreviewImgFromChild}/>
+        </TabPane>
       </Tabs>
       <Modal
         title={imgTitle}

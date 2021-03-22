@@ -82,12 +82,12 @@ const mapDispatchToProps = dispatch => {
 
 const WaybillIndex = props => {
   // console.log('props-index:', props)
-  let transportType = props.transportType;
+  let { transportType } = props;
   const [form] = Form.useForm();
   const [payFormData] = Form.useForm();
   //表格初始化状态
   const [objState, setObjState] = useState({
-    waybill_no:'',
+    waybill_no: '',
     selectedRowKeys: [], //选中的运单号
     selectedRows: [], //选中的行
     pageNum: 1,
@@ -805,7 +805,7 @@ const WaybillIndex = props => {
           <div>
             <a
               style={{ textDecoration: 'underline' }}
-              onClick={()=>openWaybillDetail(row.waybill_no)}
+              onClick={() => openWaybillDetail(row.waybill_no)}
             >
               {row.waybill_no}
             </a>
@@ -1273,7 +1273,7 @@ const WaybillIndex = props => {
         onClose={onCloseDetailDrawer}
         visible={objState.isDetailDrawer}
       >
-        <Details waybill_no={objState.waybill_no}/>
+        <Details waybill_no={objState.waybill_no} />
       </Drawer>
     </div>
   );

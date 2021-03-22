@@ -9,7 +9,7 @@ import {
   getRemovePayee,
   addpayee,
   getPayeeList,
-  getPayinfoList
+  getPayinfoList,
 } from '../sevice/waybill';
 import { formatDateYMD, accMul, accDiv } from '../util/tools';
 import { history } from 'umi';
@@ -29,7 +29,7 @@ export default {
     newPayerList: [], //新增收款人列表数据，只有一条
     payeeInfo: {}, //新增收款人列表信息
     waybillNoInfo: {}, //编辑或复制时的运单详情
-    payMentFlowList:[], //支付流水或付款信息列表 
+    payMentFlowList: [], //支付流水或付款信息列表
   },
   //一些正常的同步方法
   reducers: {
@@ -95,12 +95,12 @@ export default {
         waybillNoInfo: action.payload,
       };
     },
-    setPayMentFlowList(state,action){
+    setPayMentFlowList(state, action) {
       return {
         ...state,
-        payMentFlowList: action.payload
-      }
-    }
+        payMentFlowList: action.payload,
+      };
+    },
   },
   // 这里定义异步方法
   effects: {
@@ -171,12 +171,18 @@ export default {
     },
 
     //运单详情--支付流水或付款信息列表
-    *getPayinfoListModel({value},{call,put}){
-      const res = yield call(getPayinfoList,value);
-      if(res.code==0){
+    *getPayinfoListModel({ value }, { call, put }) {
+      const res = yield call(
+        getPayinfoList,
+        value,
+        value.paymentrequired != 1
+          ? '/payinfo/getPayinfoList'
+          : '/waybill/get_apply_list',
+      );
+      if (res.code == 0) {
         yield put({
-          type:'setPayMentFlowList',
-          payload: res.data
+          type: 'setPayMentFlowList',
+          payload: res.data,
         });
       }
     },
