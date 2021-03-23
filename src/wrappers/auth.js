@@ -6,6 +6,7 @@ export default (props) => {
     if (isLogin) {
         return <div>{props.children}</div>
     } else {
+        localStorage.removeItem('x-auth-token');
         return <Redirect to="/login" />;
     }
 }

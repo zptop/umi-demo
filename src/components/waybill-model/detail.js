@@ -135,7 +135,7 @@ const Details = props => {
         <TabPane
           tab={
             <span>
-              <IconFont type="iconjibenxinxi"/>
+              <IconFont type="iconjibenxinxi" style={{fontSize:'18px'}}/>
               基本信息
             </span>
           }
@@ -406,7 +406,7 @@ const Details = props => {
           <TabPane
             tab={
               <span>
-                <IconFont type="iconcheliangxinxi" />
+                <IconFont type="iconcheliangxinxi" style={{fontSize:'16px'}}/>
                 车辆信息
               </span>
             }
@@ -627,7 +627,7 @@ const Details = props => {
           <TabPane
             tab={
               <span>
-                <IconFont type="iconchuanboxinxi" />
+                <IconFont type="iconchuanboxinxi" style={{fontSize:'18px'}}/>
                 船舶信息
               </span>
             }
@@ -862,7 +862,7 @@ const Details = props => {
         <TabPane
           tab={
             <span>
-              <IconFont type="iconjibenxinxi" />
+              <IconFont type="iconjibenxinxi" style={{fontSize:'18px'}}/>
               {props.userInfo.PAYMENTREQUIRED != 1?'支付流水':'付款信息'}
             </span>
           }

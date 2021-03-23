@@ -1,0 +1,13 @@
+.detail_info_title {
+    display: inline-block;
+    padding: 0 10px 0 0;
+    color: #888;
+}
+
+.title_item {
+    padding: 10px 0;
+}
+
+.title_item h2 {
+    font-size: 14px;
+}

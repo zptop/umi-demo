@@ -58,7 +58,7 @@ export default {
                 message.success('注册成功');
                 setTimeout(_ => {
                     history.push('/car/index');
-                }, 500);
+                }, 300);
             } else {
                 message.warning(res.msg);
             }

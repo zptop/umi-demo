@@ -39,6 +39,7 @@ const { RangePicker } = DatePicker;
 import styles from './index.less';
 import { connect } from 'dva';
 import Details from './detail';
+import UploadRequired from '../upload-required';
 const { confirm } = Modal;
 const namespace = 'user';
 const namespace_2 = 'waybill';
@@ -81,10 +82,10 @@ const mapDispatchToProps = dispatch => {
 };
 
 const WaybillIndex = props => {
-  // console.log('props-index:', props)
   let { transportType } = props;
   const [form] = Form.useForm();
   const [payFormData] = Form.useForm();
+
   //表格初始化状态
   const [objState, setObjState] = useState({
     waybill_no: '',
@@ -101,6 +102,22 @@ const WaybillIndex = props => {
     pay_more_err_flag_3: false, //余额不足
     isDetailDrawer: false, //运单详情
   });
+
+  //走资金模态框控制
+  const [isRequiredModalVisible, setIsRequiredModalVisible] = useState(false);
+  const showRequiredModal = waybill_no => {
+    setObjState({
+      ...objState,
+      waybill_no,
+    });
+    setIsRequiredModalVisible(true);
+  };
+  const handleRequiredOk = () => {
+    setIsRequiredModalVisible(false);
+  };
+  const handleRequiredCancel = () => {
+    setIsRequiredModalVisible(false);
+  };
 
   //金额
   const [amount, setAmount] = useState({
@@ -776,7 +793,11 @@ const WaybillIndex = props => {
             >
               编辑
             </Button>
-            <Button type="primary" disabled={waybill_editable != 1}>
+            <Button
+              type="primary"
+              disabled={waybill_editable != 1}
+              onClick={() => showRequiredModal(waybill_no)}
+            >
               上传资料
             </Button>
             {props.userInfo.PAYMENTREQUIRED == 1 &&
@@ -1275,6 +1296,19 @@ const WaybillIndex = props => {
       >
         <Details waybill_no={objState.waybill_no} />
       </Drawer>
+      {/*上传资料-走资金 */}
+
+      <Modal
+        title="上传资料"
+        okText="确定"
+        cancelText="关闭"
+        width={790}
+        visible={isRequiredModalVisible}
+        onOk={handleRequiredOk}
+        onCancel={handleRequiredCancel}
+      >
+        <UploadRequired waybill_no={objState.waybill_no} />
+      </Modal>
     </div>
   );
 };

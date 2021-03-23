@@ -1,3 +1,4 @@
+import config from "../../config/config";
 /**
  * 倒计时   
  */
@@ -112,3 +113,11 @@ export const forEach = (arr, fn) => {
 export const hasChild = (item) => {
     return item.sub_items && item.sub_items.length !== 0
 }
+
+
+//获取AJAX 域名地址
+ export const getBaseUrl = () => {
+    return process.env.NODE_ENV === "development" ?
+        config.baseUrl.dev :
+        config.baseUrl.pro;
+};
