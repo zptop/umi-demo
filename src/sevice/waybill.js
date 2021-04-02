@@ -152,3 +152,24 @@ export async function getSmsCode(params) {
     params,
   });
 }
+
+/**
+ * 删除运单图片
+ */
+export async function delImgFromWaybill(params){
+  return request('/waybill/delpic', {
+    method: 'GET',
+    params,
+  });
+}
+
+
+/**
+ * 删除车辆图片
+ */
+ export async function delImgFromVehicle(params){
+  return request('/waybill/delvechilePic', {
+    method: 'GET',
+    params,
+  });
+}

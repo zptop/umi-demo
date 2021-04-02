@@ -40,6 +40,7 @@ import styles from './index.less';
 import { connect } from 'dva';
 import Details from './detail';
 import UploadRequired from '../upload-required';
+import UploadNoRequired from '../upload-no-required';
 const { confirm } = Modal;
 const namespace = 'user';
 const namespace_2 = 'waybill';
@@ -103,20 +104,37 @@ const WaybillIndex = props => {
     isDetailDrawer: false, //运单详情
   });
 
-  //走资金模态框控制
+  //走资金-模态框控制
   const [isRequiredModalVisible, setIsRequiredModalVisible] = useState(false);
-  const showRequiredModal = waybill_no => {
-    setObjState({
-      ...objState,
-      waybill_no,
-    });
-    setIsRequiredModalVisible(true);
-  };
   const handleRequiredOk = () => {
     setIsRequiredModalVisible(false);
   };
   const handleRequiredCancel = () => {
     setIsRequiredModalVisible(false);
+  };
+
+  //不走资金-模态框控制
+  const [isNoRequiredModalVisible, setIsNoRequiredModalVisible] = useState(
+    false,
+  );
+  const handleNoRequiredOk = () => {
+    setIsNoRequiredModalVisible(false);
+  };
+  const handleNoRequiredCancel = () => {
+    setIsNoRequiredModalVisible(false);
+  };
+
+  //上传资料模态框控制
+  const showUpModal = waybill_no => {
+    setObjState({
+      ...objState,
+      waybill_no,
+    });
+    if (props.userInfo.PAYMENTREQUIRED == 1) {
+      setIsRequiredModalVisible(true);
+    } else {
+      setIsNoRequiredModalVisible(true);
+    }
   };
 
   //金额
@@ -796,7 +814,7 @@ const WaybillIndex = props => {
             <Button
               type="primary"
               disabled={waybill_editable != 1}
-              onClick={() => showRequiredModal(waybill_no)}
+              onClick={() => showUpModal(waybill_no)}
             >
               上传资料
             </Button>
@@ -1296,8 +1314,8 @@ const WaybillIndex = props => {
       >
         <Details waybill_no={objState.waybill_no} />
       </Drawer>
-      {/*上传资料-走资金 */}
 
+      {/*上传资料-走资金 */}
       <Modal
         title="上传资料"
         okText="确定"
@@ -1306,8 +1324,27 @@ const WaybillIndex = props => {
         visible={isRequiredModalVisible}
         onOk={handleRequiredOk}
         onCancel={handleRequiredCancel}
+        footer={[
+          <Button key="关闭" onClick={handleRequiredCancel}>
+            关闭
+          </Button>,
+        ]}
       >
         <UploadRequired waybill_no={objState.waybill_no} />
+      </Modal>
+
+      {/**上传资料-不走资金 */}
+      <Modal
+        title="上传资料"
+        okText="确定"
+        cancelText="关闭"
+        width={740}
+        visible={isNoRequiredModalVisible}
+        onOk={handleNoRequiredOk}
+        onCancel={handleNoRequiredCancel}
+        footer={null}
+      >
+        <UploadNoRequired waybill_no={objState.waybill_no}/>
       </Modal>
     </div>
   );

@@ -10,6 +10,8 @@ import {
   addpayee,
   getPayeeList,
   getPayinfoList,
+  delImgFromWaybill,
+  delImgFromVehicle
 } from '../sevice/waybill';
 import { formatDateYMD, accMul, accDiv } from '../util/tools';
 import { history } from 'umi';
@@ -308,6 +310,22 @@ export default {
             payee_uin: '',
           },
         });
+      }
+    },
+
+    //删除运单图片
+    *delImgFromWaybillModel({ value }, { call, put }) {
+      const res = yield call(delImgFromWaybill, value);
+      if (res.code == 0) {
+        console.log('运单图片-删除成功');
+      }
+    },
+
+    //删除车辆图片
+    *delImgFromVehicleModel({ value }, { call, put }) {
+      const res = yield call(delImgFromVehicle, value);
+      if (res.code == 0) {
+        console.log('车辆图片-删除成功');
       }
     },
   },

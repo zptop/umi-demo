@@ -31,11 +31,72 @@ const DescriptionItem = ({ title, content }) => (
 );
 
 const UploadRequired = props => {
+  const [objState, setObjState] = useState({
+    replyPicListShow: [], //上传回单列表
+    contractPicListShow: [], //上传合同列表
+  });
   useEffect(() => {
     props.getWaybillDetailFn({
       waybill_no: props.waybill_no,
     });
   }, [props.waybill_no]);
+
+  //子组件传过来的回单图片
+  const replyImgFromChild = picList => {
+    console.log('reply-picList:', picList);
+    setObjState({
+      ...objState,
+      replyPicListShow: picList,
+    });
+  };
+
+  //子组件传过来的合同图片
+  const contractImgFromChild = picList => {
+    setObjState({
+      ...objState,
+      contractPicListShow: picList,
+    });
+  };
+
+  //回单图片
+  const getReplyImgArr = () => {
+    if (
+      Object.keys(props.waybillDetailInfo).length &&
+      props.waybillDetailInfo.reply_media
+    ) {
+      let replyImgArr = [];
+      props.waybillDetailInfo.reply_media.map(item => {
+        replyImgArr.push({
+          uid: item.media_id,
+          name: '回单图片',
+          status: 'done',
+          url: item.media_path,
+          thumbUrl: item.media_thumb,
+        });
+      });
+      return replyImgArr;
+    }
+  };
+
+  //合同图片
+  const getContractImgArr = () => {
+    if (
+      Object.keys(props.waybillDetailInfo).length &&
+      props.waybillDetailInfo.contract_media
+    ) {
+      let contractImgArr = [];
+      props.waybillDetailInfo.contract_media.map(item => {
+        contractImgArr.push({
+          uid: item.media_id,
+          name: '合同图片',
+          status: 'done',
+          url: item.media_path,
+          thumbUrl: item.media_thumb,
+        });
+      });
+      return contractImgArr;
+    }
+  };
 
   return (
     <div>
@@ -69,6 +130,10 @@ const UploadRequired = props => {
             service_type: 30010,
             media_type: 61,
           }}
+          picListShow={getReplyImgArr()}
+          delPicUrl="waybill/delpic"
+          flag="replyImg"
+          replyImg={replyImgFromChild}
         />
       </div>
       <div className={styles.title_item}>
@@ -79,6 +144,10 @@ const UploadRequired = props => {
             service_type: 30010,
             media_type: 21,
           }}
+          picListShow={getContractImgArr()}
+          delPicUrl="waybill/delpic"
+          flag="contractImg"
+          contractImg={contractImgFromChild}
         />
       </div>
     </div>
