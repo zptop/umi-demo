@@ -33,13 +33,11 @@ const UploadImgModal = props => {
   });
 
   useEffect(() => {
-    if (props && props.picListShow && props.picListShow.length) {
-      setObjState({
-        ...objState,
-        previewVisible: false,
-        fileList: props.picListShow,
-      });
-    }
+    setObjState({
+      ...objState,
+      previewVisible: false,
+      fileList: props.picListShow,
+    });
   }, [props.data.service_no]);
 
   const handleCancel = () =>
@@ -70,12 +68,26 @@ const UploadImgModal = props => {
 
   //上传
   const handleChange = ({ fileList }) => {
+    console.log('fileList:', fileList);
     if (fileList.length > 0) {
-      let picList = fileList.map(item => {
+      let picList = [];
+      fileList.forEach(item => {
         if (item.response) {
-          return item.response.data;
+          let {
+            response: { data },
+          } = item;
+          picList.push({
+            uid: data.media_id,
+            name: props.title,
+            status: 'done',
+            url: data.media_path,
+            thumbUrl: data.media_thumb,
+          });
+        }else{
+          picList.push(item);
         }
       });
+      console.log('picList-child:',picList)
       props[props.flag](picList); //子组件通过函数传值到父组件
     }
     setObjState({ ...objState, fileList });
@@ -83,14 +95,13 @@ const UploadImgModal = props => {
 
   //删除
   const handleonRemove = file => {
-    if (props.delPicUrl == 'waybill/delpic') {
-      //删除运单图片
-      if (file && file.response && file.response.data) {
-        let { media_id } = file.response.data;
-        props.delImgFromWaybillFn({ media_id });
+    if (file) {
+      if (props.delPicUrl == 'waybill/delpic') {
+        //删除运单图片
+        props.delImgFromWaybillFn({ media_id: file.uid });
+      } else {
+        //删除车辆图片
       }
-    } else {
-      //删除车辆图片
     }
   };
 
@@ -117,22 +128,24 @@ const UploadImgModal = props => {
 
   return (
     <div>
-      <Upload
-        action={getBaseUrl() + '/waybill/addpic'}
-        name="media_file"
-        withCredentials={true}
-        listType="picture-card"
-        data={props.data}
-        fileList={fileList}
-        headers={{ 'Access-WR-Token': localStorage.getItem('x-auth-token') }}
-        beforeUpload={beforeUpload}
-        onPreview={handlePreview}
-        onRemove={handleonRemove}
-        onChange={handleChange}
-        accept="image/*,.pdf"
-      >
-        {fileList.length >= 9 ? null : uploadButton}
-      </Upload>
+      {fileList && (
+        <Upload
+          action={getBaseUrl() + '/waybill/addpic'}
+          name="media_file"
+          withCredentials={true}
+          listType="picture-card"
+          data={props.data}
+          fileList={fileList}
+          headers={{ 'Access-WR-Token': localStorage.getItem('x-auth-token') }}
+          beforeUpload={beforeUpload}
+          onPreview={handlePreview}
+          onRemove={handleonRemove}
+          onChange={handleChange}
+          accept="image/*,.pdf"
+        >
+          {fileList.length >= 9 ? null : uploadButton}
+        </Upload>
+      )}
       <Modal
         visible={previewVisible}
         title={previewTitle}

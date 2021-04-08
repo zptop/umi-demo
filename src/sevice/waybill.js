@@ -156,20 +156,41 @@ export async function getSmsCode(params) {
 /**
  * 删除运单图片
  */
-export async function delImgFromWaybill(params){
+export async function delImgFromWaybill(params) {
   return request('/waybill/delpic', {
     method: 'GET',
     params,
   });
 }
 
-
 /**
  * 删除车辆图片
  */
- export async function delImgFromVehicle(params){
+export async function delImgFromVehicle(params) {
   return request('/waybill/delvechilePic', {
     method: 'GET',
     params,
   });
+}
+
+/**
+ * 不走资金-上传资料，提交
+ */
+export async function uploadNoRequiredSubmit(data, url) {
+  return request(url, {
+    method: 'POST',
+    data,
+    requestType: 'form',
+  });
+}
+
+
+/**
+ * 获取支付渠道
+ */
+export async function getPayChannel(params){
+  return request('/payinfo/getPayChanCode',{
+    method:'GET',
+    params
+  })
 }

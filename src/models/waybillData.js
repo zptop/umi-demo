@@ -11,7 +11,9 @@ import {
   getPayeeList,
   getPayinfoList,
   delImgFromWaybill,
-  delImgFromVehicle
+  delImgFromVehicle,
+  uploadNoRequiredSubmit,
+  getPayChannel,
 } from '../sevice/waybill';
 import { formatDateYMD, accMul, accDiv } from '../util/tools';
 import { history } from 'umi';
@@ -32,6 +34,7 @@ export default {
     payeeInfo: {}, //新增收款人列表信息
     waybillNoInfo: {}, //编辑或复制时的运单详情
     payMentFlowList: [], //支付流水或付款信息列表
+    payChannelArr: [], //银行支付列表
   },
   //一些正常的同步方法
   reducers: {
@@ -92,6 +95,7 @@ export default {
       };
     },
     setWaybillNoInfo(state, action) {
+      // console.log('action.payload：',action.payload)
       return {
         ...state,
         waybillNoInfo: action.payload,
@@ -101,6 +105,12 @@ export default {
       return {
         ...state,
         payMentFlowList: action.payload,
+      };
+    },
+    setPayChannelArr(state, action) {
+      return {
+        ...state,
+        payChannelArr: action.payload,
       };
     },
   },
@@ -326,6 +336,25 @@ export default {
       const res = yield call(delImgFromVehicle, value);
       if (res.code == 0) {
         console.log('车辆图片-删除成功');
+      }
+    },
+
+    //不走资金-上传资料，提交
+    *uploadNoRequiredSubmitModel({ value }, { call, put }) {
+      const res = yield call(uploadNoRequiredSubmit, value);
+      if (res.code == 0) {
+        console.log('提交成功');
+      }
+    },
+
+    //获取支付渠道
+    *getPayChannelModel({ value }, { call, put }) {
+      const res = yield call(getPayChannel, value);
+      if (res.code == 0) {
+        yield put({
+          type: 'setPayChannelArr',
+          payload: res.data,
+        });
       }
     },
   },

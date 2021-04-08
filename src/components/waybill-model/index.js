@@ -118,7 +118,7 @@ const WaybillIndex = props => {
     false,
   );
   const handleNoRequiredOk = () => {
-    setIsNoRequiredModalVisible(false);
+    // setIsNoRequiredModalVisible(false);
   };
   const handleNoRequiredCancel = () => {
     setIsNoRequiredModalVisible(false);
@@ -1330,7 +1330,10 @@ const WaybillIndex = props => {
           </Button>,
         ]}
       >
-        <UploadRequired waybill_no={objState.waybill_no} />
+        <UploadRequired
+          waybill_no={objState.waybill_no}
+          transportType={transportType}
+        />
       </Modal>
 
       {/**上传资料-不走资金 */}
@@ -1344,7 +1347,10 @@ const WaybillIndex = props => {
         onCancel={handleNoRequiredCancel}
         footer={null}
       >
-        <UploadNoRequired waybill_no={objState.waybill_no}/>
+        <UploadNoRequired
+          waybill_no={objState.waybill_no}
+          transportType={transportType}
+        />
       </Modal>
     </div>
   );
