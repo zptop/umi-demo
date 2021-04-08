@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Row, Col, Modal, Button, Form, Input, Radio } from 'antd';
+import { Row, Col, Modal, Button, Form, Input, Radio, message } from 'antd';
 import { accMul } from '../../util/tools';
 import UploadImgModal from '../upload-img-modal';
 import { connect } from 'dva';
@@ -69,9 +69,9 @@ const UploadNoRequired = props => {
       ...fieldsValue,
       waybill_no: props.waybill_no,
       waybill_amount: accMul(fieldsValue['waybill_amount'], 100),
-      reply_media_ids: reply_media_ids.current,
-      contract_media_ids: contract_media_ids.current,
-      pay_media_ids: pay_media_ids.current,
+      reply_media_ids: reply_media_ids.current || '',
+      contract_media_ids: contract_media_ids.current || '',
+      pay_media_ids: pay_media_ids.current || '',
       transportType: props.transportType,
     };
     console.log('Success-values:', values);
@@ -139,8 +139,8 @@ const UploadNoRequired = props => {
       waybillDetailInfo,
       waybillDetailInfo: { reply_media },
     } = props;
+    let reply_media_temp = [];
     if (Object.keys(waybillDetailInfo).length && reply_media) {
-      let reply_media_temp = [];
       reply_media.forEach(item => {
         reply_media_temp.push({
           uid: item.media_id,
@@ -153,8 +153,8 @@ const UploadNoRequired = props => {
       reply_media_ids.current = reply_media
         .map(item => item.media_id)
         .join(',');
-      return reply_media_temp;
     }
+    return reply_media_temp;
   };
 
   //合同图片
@@ -163,8 +163,8 @@ const UploadNoRequired = props => {
       waybillDetailInfo,
       waybillDetailInfo: { contract_media },
     } = props;
+    let contract_media_temp = [];
     if (Object.keys(waybillDetailInfo).length && contract_media) {
-      let contract_media_temp = [];
       contract_media.forEach(item => {
         contract_media_temp.push({
           uid: item.media_id,
@@ -177,8 +177,8 @@ const UploadNoRequired = props => {
       contract_media_ids.current = contract_media
         .map(item => item.media_id)
         .join(',');
-      return contract_media_temp;
     }
+    return contract_media_temp;
   };
 
   //银行支付凭证
@@ -187,8 +187,8 @@ const UploadNoRequired = props => {
       waybillDetailInfo,
       waybillDetailInfo: { pay_media },
     } = props;
+    let pay_media_temp = [];
     if (Object.keys(waybillDetailInfo).length && pay_media) {
-      let pay_media_temp = [];
       pay_media.forEach(item => {
         pay_media_temp.push({
           uid: item.media_id,
@@ -199,8 +199,8 @@ const UploadNoRequired = props => {
         });
       });
       pay_media_ids.current = pay_media.map(item => item.media_id).join(',');
-      return pay_media_temp;
     }
+    return pay_media_temp;
   };
 
   return (

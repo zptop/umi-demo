@@ -31,10 +31,6 @@ const DescriptionItem = ({ title, content }) => (
 );
 
 const UploadRequired = props => {
-  const [objState, setObjState] = useState({
-    replyPicListShow: [], //上传回单列表
-    contractPicListShow: [], //上传合同列表
-  });
   useEffect(() => {
     props.getWaybillDetailFn({
       waybill_no: props.waybill_no,
@@ -43,28 +39,23 @@ const UploadRequired = props => {
 
   //子组件传过来的回单图片
   const replyImgFromChild = picList => {
-    setObjState({
-      ...objState,
-      replyPicListShow: picList,
-    });
+    console.log('picList-reply:', picList);
   };
 
   //子组件传过来的合同图片
   const contractImgFromChild = picList => {
-    setObjState({
-      ...objState,
-      contractPicListShow: picList,
-    });
+    console.log('picList-contract:', picList);
   };
 
   //回单图片
   const getReplyImgArr = () => {
+    let {
+      waybillDetailInfo,
+      waybillDetailInfo: { reply_media },
+    } = props;
     let reply_media_temp = [];
-    if (
-      Object.keys(props.waybillDetailInfo).length > 0 &&
-      props.waybillDetailInfo.reply_media.length > 0
-    ) {
-      props.waybillDetailInfo.reply_media.forEach(item => {
+    if (Object.keys(waybillDetailInfo).length > 0 && reply_media > 0) {
+      reply_media.forEach(item => {
         reply_media_temp.push({
           uid: item.media_id,
           name: '回单图片',
@@ -74,17 +65,18 @@ const UploadRequired = props => {
         });
       });
     }
-    return [...new Set(reply_media_temp)];
+    return reply_media_temp;
   };
 
   //合同图片
   const getContractImgArr = () => {
+    let {
+      waybillDetailInfo,
+      waybillDetailInfo: { contract_media },
+    } = props;
     let contract_media_temp = [];
-    if (
-      Object.keys(props.waybillDetailInfo).length > 0 &&
-      props.waybillDetailInfo.contract_media.length > 0
-    ) {
-      props.waybillDetailInfo.contract_media.forEach(item => {
+    if (Object.keys(waybillDetailInfo).length > 0 && contract_media) {
+      contract_media.forEach(item => {
         contract_media_temp.push({
           uid: item.media_id,
           name: '合同图片',
@@ -94,7 +86,7 @@ const UploadRequired = props => {
         });
       });
     }
-    return [...new Set(contract_media_temp)];
+    return contract_media_temp;
   };
 
   return (

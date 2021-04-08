@@ -67,30 +67,37 @@ const UploadImgModal = props => {
   };
 
   //上传
-  const handleChange = ({ fileList }) => {
-    console.log('fileList:', fileList);
-    if (fileList.length > 0) {
-      let picList = [];
-      fileList.forEach(item => {
-        if (item.response) {
-          let {
-            response: { data },
-          } = item;
-          picList.push({
-            uid: data.media_id,
-            name: props.title,
-            status: 'done',
-            url: data.media_path,
-            thumbUrl: data.media_thumb,
+  const handleChange = ({ file, fileList }) => {
+    if (file && file.response) {
+      let {
+        response: { code, msg },
+      } = file;
+      if (code == 0) {
+        if (fileList.length > 0) {
+          let picList = [];
+          fileList.forEach(item => {
+            if (item.response) {
+              let {
+                response: { data },
+              } = item;
+              picList.push({
+                uid: data.media_id,
+                name: props.title,
+                status: 'done',
+                url: data.media_path,
+                thumbUrl: data.media_thumb,
+              });
+            } else {
+              picList.push(item);
+            }
           });
-        }else{
-          picList.push(item);
+          props[props.flag](picList); //子组件通过函数传值到父组件
         }
-      });
-      console.log('picList-child:',picList)
-      props[props.flag](picList); //子组件通过函数传值到父组件
+        setObjState({ ...objState, fileList });
+      } else {
+        message.warning(msg);
+      }
     }
-    setObjState({ ...objState, fileList });
   };
 
   //删除
