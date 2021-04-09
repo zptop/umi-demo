@@ -54,7 +54,7 @@ const UploadRequired = props => {
       waybillDetailInfo: { reply_media },
     } = props;
     let reply_media_temp = [];
-    if (Object.keys(waybillDetailInfo).length > 0 && reply_media > 0) {
+    if (Object.keys(waybillDetailInfo).length && reply_media) {
       reply_media.forEach(item => {
         reply_media_temp.push({
           uid: item.media_id,
@@ -75,7 +75,7 @@ const UploadRequired = props => {
       waybillDetailInfo: { contract_media },
     } = props;
     let contract_media_temp = [];
-    if (Object.keys(waybillDetailInfo).length > 0 && contract_media) {
+    if (Object.keys(waybillDetailInfo).length && contract_media) {
       contract_media.forEach(item => {
         contract_media_temp.push({
           uid: item.media_id,

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Row, Col, Modal, Button, Form, Input, Radio, message } from 'antd';
-import { accMul } from '../../util/tools';
+import { accMul, accDiv } from '../../util/tools';
 import UploadImgModal from '../upload-img-modal';
 import { connect } from 'dva';
 const namespace = 'waybill';
@@ -8,9 +8,11 @@ import styles from './index.less';
 const mapStateToProps = state => {
   let waybillDetailInfo = state[namespace].waybillNoInfo || {};
   let payChannelArr = state[namespace].payChannelArr || [];
+  let isNoRequiredModalVisible = state[namespace].isNoRequiredModalVisible;
   return {
     waybillDetailInfo,
     payChannelArr,
+    isNoRequiredModalVisible,
   };
 };
 
@@ -57,12 +59,25 @@ const UploadNoRequired = props => {
   const reply_media_ids = useRef(null);
   const contract_media_ids = useRef(null);
   const pay_media_ids = useRef(null);
+
   useEffect(() => {
     props.getWaybillDetailFn({
       waybill_no: props.waybill_no,
     });
     props.getPayChannelFn();
   }, [props.waybill_no]);
+
+  useEffect(() => {
+    console.log('props:',props)
+    if (props && Object.keys(props.waybillDetailInfo).length) {
+      let { waybill_amount, pay_style, pay_channel } = props.waybillDetailInfo;
+      form.setFieldsValue({
+        waybill_amount: accDiv(waybill_amount, 100).toFixed(2),
+        pay_style,
+        pay_channel,
+      });
+    }
+  }, [props.waybillDetailInfo.waybill_no]);
 
   const onFinish = fieldsValue => {
     let values = {
@@ -74,8 +89,8 @@ const UploadNoRequired = props => {
       pay_media_ids: pay_media_ids.current || '',
       transportType: props.transportType,
     };
-    console.log('Success-values:', values);
-    // props.uploadNoRequiredSubmitFn(values)
+    props.uploadNoRequiredSubmitFn(values);
+    props.closeModelFromChild(props.isNoRequiredModalVisible);
   };
 
   const onFinishFailed = errorInfo => {
@@ -242,7 +257,11 @@ const UploadNoRequired = props => {
           <Input />
         </Form.Item>
         <Form.Item label="快捷输入">
-          <Radio.Group buttonStyle="solid" onChange={quickChecked}>
+          <Radio.Group
+            buttonStyle="solid"
+            onChange={quickChecked}
+            value={props.waybillDetailInfo.pay_style || ''}
+          >
             <Radio.Button value="银行转账">银行转账</Radio.Button>
             <Radio.Button value="第三方支付">第三方支付</Radio.Button>
           </Radio.Group>

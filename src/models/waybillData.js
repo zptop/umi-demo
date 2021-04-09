@@ -35,6 +35,7 @@ export default {
     waybillNoInfo: {}, //编辑或复制时的运单详情
     payMentFlowList: [], //支付流水或付款信息列表
     payChannelArr: [], //银行支付列表
+    isNoRequiredModalVisible: false, //上传资料，不走资金弹框显示控制
   },
   //一些正常的同步方法
   reducers: {
@@ -95,7 +96,6 @@ export default {
       };
     },
     setWaybillNoInfo(state, action) {
-      // console.log('action.payload：',action.payload)
       return {
         ...state,
         waybillNoInfo: action.payload,
@@ -111,6 +111,12 @@ export default {
       return {
         ...state,
         payChannelArr: action.payload,
+      };
+    },
+    setIsNoRequiredModalVisible(state) {
+      return {
+        ...state,
+        isNoRequiredModalVisible: false
       };
     },
   },
@@ -341,9 +347,16 @@ export default {
 
     //不走资金-上传资料，提交
     *uploadNoRequiredSubmitModel({ value }, { call, put }) {
-      const res = yield call(uploadNoRequiredSubmit, value);
+      const res = yield call(
+        uploadNoRequiredSubmit,
+        value,
+        value.transportType == 1 ? '/car/update_trade' : '/ship/update_trade',
+      );
       if (res.code == 0) {
-        console.log('提交成功');
+        message.success('保存成功');
+        yield put({type:'setIsNoRequiredModalVisible'});
+      } else {
+        message.warning(res.msg || '保存失败');
       }
     },
 
@@ -382,5 +395,6 @@ export default {
         }
       });
     },
+    
   },
 };

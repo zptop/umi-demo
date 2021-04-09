@@ -124,6 +124,11 @@ const WaybillIndex = props => {
     setIsNoRequiredModalVisible(false);
   };
 
+  //不走资金-关闭模态框
+  const closeModel = flag => {
+    setIsNoRequiredModalVisible(flag);
+  };
+
   //上传资料模态框控制
   const showUpModal = waybill_no => {
     setObjState({
@@ -1350,6 +1355,7 @@ const WaybillIndex = props => {
         <UploadNoRequired
           waybill_no={objState.waybill_no}
           transportType={transportType}
+          closeModelFromChild={closeModel}
         />
       </Modal>
     </div>
