@@ -16,6 +16,7 @@ import {
   Divider,
   Tooltip,
 } from 'antd';
+const { Search } = Input;
 import {
   ExclamationCircleFilled,
   UserAddOutlined,
@@ -99,7 +100,7 @@ const formItemLayout = {
       span: 24,
     },
     sm: {
-      span: 4,
+      span: 6,
     },
   },
   wrapperCol: {
@@ -223,14 +224,14 @@ const FormIndex = props => {
           trans_vehicle_name,
         } = props.waybillNoInfo,
         load_place_id = Object.values(load_place).filter(item =>
-          /\d/.test(Number(item)),
+          /\d/.test(item * 1),
         ),
         unload_place_id = Object.values(unload_place).filter(item =>
-          /\d/.test(Number(item)),
+          /\d/.test(item * 1),
         );
       if (transport_type == 2) {
-        load_place_id = load_place_id.map(item => Number(item));
-        unload_place_id = unload_place_id.map(item => Number(item));
+        load_place_id = load_place_id.map(item => item * 1);
+        unload_place_id = unload_place_id.map(item => item * 1);
       }
       form.setFieldsValue({
         goods_name,
@@ -337,7 +338,6 @@ const FormIndex = props => {
         ? location.query.waybill_no
         : '',
     };
-    console.log('values:', values);
     props.submitFormFn(values);
   };
   //设置承运人-选择司机
@@ -561,7 +561,7 @@ const FormIndex = props => {
     let idArr = [province_id, city_id, area_id];
     form.setFieldsValue({
       load_place_id:
-        props.transportType == 1 ? idArr : idArr.map(item => Number(item)),
+        props.transportType == 1 ? idArr : idArr.map(item => item * 1),
       load_place_detail,
     });
   };
@@ -580,7 +580,7 @@ const FormIndex = props => {
       consi_name,
       consi_contact_mobile,
       unload_place_id:
-        props.transportType == 1 ? idArr : idArr.map(item => Number(item)),
+        props.transportType == 1 ? idArr : idArr.map(item => item * 1),
       unload_place_detail,
     });
   };
@@ -777,8 +777,43 @@ const FormIndex = props => {
     selectPayerNewForm.resetFields();
   };
 
+  //单位选择
+  const selectAfter = (
+    <Form.Item
+      name="goods_unit"
+      rules={[
+        {
+          required: true,
+          message: 'Please select',
+        },
+      ]}
+      className={styles.select_after}
+    >
+      <Select placeholder="请选择" defaultValue="0">
+        <Select.Option value="0">吨</Select.Option>
+        <Select.Option value="1">纸箱</Select.Option>
+        <Select.Option value="2">木箱</Select.Option>
+        <Select.Option value="3">板条箱</Select.Option>
+        <Select.Option value="4">大立箱</Select.Option>
+        <Select.Option value="5">包</Select.Option>
+        <Select.Option value="6">袋</Select.Option>
+        <Select.Option value="7">篓</Select.Option>
+        <Select.Option value="8">托盘</Select.Option>
+        <Select.Option value="9">桶</Select.Option>
+        <Select.Option value="10">听</Select.Option>
+        <Select.Option value="11">瓶</Select.Option>
+        <Select.Option value="12">罐</Select.Option>
+        <Select.Option value="13">盒</Select.Option>
+        <Select.Option value="14">支</Select.Option>
+        <Select.Option value="15">件</Select.Option>
+        <Select.Option value="16">集装箱</Select.Option>
+        <Select.Option value="17">方</Select.Option>
+      </Select>
+    </Form.Item>
+  );
+
   return (
-    <div>
+    <div className={styles.form_box}>
       <Helmet>
         <title>{location.query.title}</title>
       </Helmet>
@@ -803,368 +838,355 @@ const FormIndex = props => {
       >
         <Row>
           <Col span={16} className={styles.content_left}>
-            <div className={styles.split_line}>货物信息</div>
-            <Row>
-              <Col span={12}>
-                <Form.Item
-                  name="goods_name"
-                  label="货物名称"
-                  rules={[
-                    {
-                      required: true,
-                      message: '货物名称未输入',
-                    },
-                  ]}
-                >
-                  <Input placeholder="请输入货物名称" />
-                </Form.Item>
+            <Row gutter={24}>
+              <Col span={3}>
+                <div>货物信息</div>
               </Col>
-              <Col span={12}>
-                <Form.Item
-                  name="goods_type"
-                  label="货物类型"
-                  rules={[
-                    {
-                      required: true,
-                      message: '货物类型未选择',
-                    },
-                    {
-                      validator: oldHighWayCodeRxp,
-                    },
-                  ]}
-                >
-                  <Select placeholder="请选择">{renderOptions(highway)}</Select>
-                </Form.Item>
-              </Col>
-            </Row>
-            <Row>
-              <Col span={12}>
-                <Form.Item
-                  name="goods_num"
-                  label="货物重量"
-                  rules={[
-                    {
-                      required: true,
-                      message: '货物重量未输入',
-                    },
-                    {
-                      validator: validateGoodsNum,
-                    },
-                  ]}
-                >
-                  <Input placeholder="请输入货物重量" />
-                </Form.Item>
-              </Col>
-              <Col>
-                <Form.Item
-                  name="goods_unit"
-                  rules={[
-                    {
-                      required: true,
-                      message: '未选择',
-                    },
-                  ]}
-                >
-                  <Select
-                    placeholder="请选择"
-                    style={{
-                      position: 'relative',
-                      left: '-90px',
-                      width: '90px',
-                    }}
-                  >
-                    <Select.Option value="0">吨</Select.Option>
-                    <Select.Option value="1">纸箱</Select.Option>
-                    <Select.Option value="2">木箱</Select.Option>
-                    <Select.Option value="3">板条箱</Select.Option>
-                    <Select.Option value="4">大立箱</Select.Option>
-                    <Select.Option value="5">包</Select.Option>
-                    <Select.Option value="6">袋</Select.Option>
-                    <Select.Option value="7">篓</Select.Option>
-                    <Select.Option value="8">托盘</Select.Option>
-                    <Select.Option value="9">桶</Select.Option>
-                    <Select.Option value="10">听</Select.Option>
-                    <Select.Option value="11">瓶</Select.Option>
-                    <Select.Option value="12">罐</Select.Option>
-                    <Select.Option value="13">盒</Select.Option>
-                    <Select.Option value="14">支</Select.Option>
-                    <Select.Option value="15">件</Select.Option>
-                    <Select.Option value="16">集装箱</Select.Option>
-                    <Select.Option value="17">方</Select.Option>
-                  </Select>
-                </Form.Item>
+              <Col span={21}>
+                <Row>
+                  <Col span={12}>
+                    <Form.Item
+                      name="goods_name"
+                      label="货物名称"
+                      rules={[
+                        {
+                          required: true,
+                          message: '货物名称未输入',
+                        },
+                      ]}
+                    >
+                      <Input placeholder="请输入货物名称" />
+                    </Form.Item>
+                  </Col>
+                  <Col span={12}>
+                    <Form.Item
+                      name="goods_type"
+                      label="货物类型"
+                      rules={[
+                        {
+                          required: true,
+                          message: '货物类型未选择',
+                        },
+                        {
+                          validator: oldHighWayCodeRxp,
+                        },
+                      ]}
+                    >
+                      <Select placeholder="请选择">
+                        {renderOptions(highway)}
+                      </Select>
+                    </Form.Item>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col span={12}>
+                    <Form.Item
+                      name="goods_num"
+                      label="货物重量"
+                      rules={[
+                        {
+                          required: true,
+                          message: '货物重量未输入',
+                        },
+                        {
+                          validator: validateGoodsNum,
+                        },
+                      ]}
+                    >
+                      <Input
+                        placeholder="请输入货物重量"
+                        addonAfter={selectAfter}
+                      />
+                    </Form.Item>
+                  </Col>
+                </Row>
               </Col>
             </Row>
-            <div className={styles.split_line}>收发货信息</div>
-            <Row>
-              <Col span={12}>
-                <Form.Item
-                  name="load_time"
-                  label="起运时间"
-                  rules={[{ required: true, message: '起运时间未选择' }]}
-                >
-                  <DatePicker
-                    placeholder="请选择起运时间"
-                    className="ant-input"
-                  />
-                </Form.Item>
-              </Col>
-              <Col span={12}>
-                <Form.Item
-                  name="unload_time"
-                  label="到达时间"
-                  rules={[{ required: true, message: '到达时间未选择' }]}
-                >
-                  <DatePicker
-                    placeholder="请选择到达时间"
-                    className="ant-input"
-                  />
-                </Form.Item>
-              </Col>
-            </Row>
-            <Row>
-              <Col span={12}>
-                <Form.Item
-                  name="load_place_id"
-                  label="货物起运地"
-                  rules={[
-                    {
-                      required: true,
-                      message: '货物起运地未选择',
-                    },
-                  ]}
-                >
-                  <Cascader
-                    options={props.addr}
-                    placeholder="请选择货物起运地"
-                  />
-                </Form.Item>
-              </Col>
-              <Col span={12}>
-                <Form.Item
-                  name="load_place_detail"
-                  rules={[
-                    {
-                      required: true,
-                      message: '详细地址未输入',
-                    },
-                  ]}
-                >
-                  <Input placeholder="请输入详细地址" />
-                </Form.Item>
-              </Col>
-            </Row>
-            <Row>
-              <Col span={12}>
-                <Form.Item
-                  name="consi_name"
-                  label="收货方名称"
-                  rules={[
-                    {
-                      required: true,
-                      message: '收货方名称未输入',
-                    },
-                  ]}
-                >
-                  <Input placeholder="请输入收货方名称" />
-                </Form.Item>
-              </Col>
-              <Col span={12}>
-                <Form.Item
-                  name="consi_contact_mobile"
-                  label="收货方电话"
-                  rules={[
-                    {
-                      required: true,
-                      message: '收货方电话未输入',
-                    },
-                  ]}
-                >
-                  <Input placeholder="请输入收货方电话" />
-                </Form.Item>
-              </Col>
-            </Row>
-            <Row>
-              <Col span={12}>
-                <Form.Item
-                  name="unload_place_id"
-                  label="货物到达地"
-                  rules={[
-                    {
-                      required: true,
-                      message: '货物到达地未选择',
-                    },
-                  ]}
-                >
-                  <Cascader
-                    options={props.addr}
-                    placeholder="请选择货物到达地"
-                  />
-                </Form.Item>
-              </Col>
-              <Col span={12}>
-                <Form.Item
-                  name="unload_place_detail"
-                  rules={[
-                    {
-                      required: true,
-                      message: '详细地址未输入',
-                    },
-                  ]}
-                >
-                  <Input placeholder="请输入详细地址" />
-                </Form.Item>
-              </Col>
-            </Row>
-            <div className={styles.split_line}>费用信息</div>
-            <Row>
-              <Col span={12}>
-                <Form.Item
-                  style={{ marginBottom: 0 }}
-                  name="labour_amount"
-                  label="运输劳务费"
-                  rules={[
-                    {
-                      required: true,
-                      message: '运输劳务费未输入',
-                    },
-                    {
-                      validator: validateLabourAmount,
-                    },
-                  ]}
-                >
-                  <Input placeholder="请输入承运人劳务费" />
-                </Form.Item>
-                <div className="ant-row ant-form-item">
-                  <div style={{ position: 'relative', left: '86px' }}>
-                    <span style={{ lineHeight: 1.8 }}>
-                      *运输劳务费不含油气、过路费等，即通过平台支付部分
-                    </span>
-                    <span style={{ display: 'block', color: '#00b0b5' }}>
-                      含税开票金额(元)：100
-                    </span>
-                  </div>
-                </div>
-              </Col>
-            </Row>
-            <Row>
-              <Col span={12}>
-                <Form.Item name="remark" label="备注">
-                  <Input.TextArea placeholder="请输入备注" />
-                </Form.Item>
-              </Col>
-            </Row>
-            <Row>
-              <Col span={12}>
-                <Form.Item name="carrier_name" label="承运人">
-                  <Input disabled placeholder="请选择承运人" />
-                </Form.Item>
-              </Col>
-              <Col>
-                <Button
-                  style={{
-                    position: 'relative',
-                    left: '-90px',
-                    display: 'inline-block',
-                  }}
-                  type="primary"
-                  onClick={openSelectCarrierModal}
-                >
-                  选择
-                </Button>
-              </Col>
-              <span
-                style={{
-                  position: 'relative',
-                  top: '-18px',
-                  left: '86px',
-                  display: 'block',
-                }}
-              >
-                *若承运人未完成注册认证及运输工具的添加，可暂不指定，稍后通过编辑功能再指定承运人
-              </span>
-            </Row>
-            {objState.payeeSwitch && (
-              <Row span={24}>
-                <Col span={12}>
-                  <Form.Item label="运费收款人">
-                    <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
-                      <Col className={styles.recipient} span={10}>
-                        承运人：
-                        {form.getFieldValue('carrier_name').replace(/\d+/g, '')}
-                      </Col>
-                      {form.getFieldValue('payee_uin') ? (
-                        <Col className={`${styles.recipient}`} span={10}>
-                          {form.getFieldValue('payee_name')}
-                        </Col>
-                      ) : (
-                        <Col
-                          className={`${styles.recipient} ${styles.on}`}
-                          span={10}
-                          onClick={openPayerNewrModal}
-                        >
-                          <UserAddOutlined />
-                          新增1名收款人
-                        </Col>
-                      )}
 
-                      {form.getFieldValue('payee_uin') && (
-                        <CloseCircleFilled
-                          style={{
-                            position: 'absolute',
-                            right: 0,
-                            top: '-8px',
-                            fontSize: '20px',
-                            color: '#00b0b5',
-                          }}
-                          onClick={handleRemovePayee}
-                        />
-                      )}
-                    </Row>
-                  </Form.Item>
-                  <span
-                    style={{
-                      position: 'relative',
-                      top: '-18px',
-                      left: '86px',
-                      display: 'block',
-                    }}
-                  >
-                    *承运人为默认收款人,不可删改,最多允许额外新增1名收款人
-                  </span>
-                </Col>
-              </Row>
-            )}
-            <Row>
-              <Col span={24}>
-                <Form.Item hidden name="carrier_uin">
-                  <Input />
-                </Form.Item>
-                <Form.Item hidden name="transport_name">
-                  <Input />
-                </Form.Item>
-                <Form.Item hidden name="transport_uin">
-                  <Input />
-                </Form.Item>
-                <Form.Item hidden name="trans_vehicle_id">
-                  <Input />
-                </Form.Item>
-                <Form.Item hidden name="trans_vehicle_name">
-                  <Input />
-                </Form.Item>
-                <Form.Item hidden name="payee_name">
-                  <Input />
-                </Form.Item>
-                <Form.Item hidden name="payee_uin">
-                  <Input />
-                </Form.Item>
-                <Form.Item hidden name="title">
-                  <Input />
-                </Form.Item>
+            <Row gutter={24} className={styles.goods_info_style}>
+              <Col span={3}>
+                <div>收发货信息</div>
+              </Col>
+              <Col span={21}>
+                <Row>
+                  <Col span={12}>
+                    <Form.Item
+                      name="load_time"
+                      label="起运时间"
+                      rules={[{ required: true, message: '起运时间未选择' }]}
+                    >
+                      <DatePicker
+                        placeholder="请选择起运时间"
+                        className="ant-input"
+                      />
+                    </Form.Item>
+                  </Col>
+                  <Col span={12}>
+                    <Form.Item
+                      name="unload_time"
+                      label="到达时间"
+                      rules={[{ required: true, message: '到达时间未选择' }]}
+                    >
+                      <DatePicker
+                        placeholder="请选择到达时间"
+                        className="ant-input"
+                      />
+                    </Form.Item>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col span={12}>
+                    <Form.Item
+                      name="load_place_id"
+                      label="货物起运地"
+                      rules={[
+                        {
+                          required: true,
+                          message: '货物起运地未选择',
+                        },
+                      ]}
+                    >
+                      <Cascader
+                        options={props.addr}
+                        placeholder="请选择货物起运地"
+                      />
+                    </Form.Item>
+                  </Col>
+                  <Col span={12}>
+                    <Form.Item
+                      name="load_place_detail"
+                      rules={[
+                        {
+                          required: true,
+                          message: '详细地址未输入',
+                        },
+                      ]}
+                    >
+                      <Input placeholder="请输入详细地址" />
+                    </Form.Item>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col span={12}>
+                    <Form.Item
+                      name="consi_name"
+                      label="收货方名称"
+                      rules={[
+                        {
+                          required: true,
+                          message: '收货方名称未输入',
+                        },
+                      ]}
+                    >
+                      <Input placeholder="请输入收货方名称" />
+                    </Form.Item>
+                  </Col>
+                  <Col span={12}>
+                    <Form.Item
+                      name="consi_contact_mobile"
+                      label="收货方电话"
+                      rules={[
+                        {
+                          required: true,
+                          message: '收货方电话未输入',
+                        },
+                      ]}
+                    >
+                      <Input placeholder="请输入收货方电话" />
+                    </Form.Item>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col span={12}>
+                    <Form.Item
+                      name="unload_place_id"
+                      label="货物到达地"
+                      rules={[
+                        {
+                          required: true,
+                          message: '货物到达地未选择',
+                        },
+                      ]}
+                    >
+                      <Cascader
+                        options={props.addr}
+                        placeholder="请选择货物到达地"
+                      />
+                    </Form.Item>
+                  </Col>
+                  <Col span={12}>
+                    <Form.Item
+                      name="unload_place_detail"
+                      rules={[
+                        {
+                          required: true,
+                          message: '详细地址未输入',
+                        },
+                      ]}
+                    >
+                      <Input placeholder="请输入详细地址" />
+                    </Form.Item>
+                  </Col>
+                </Row>
               </Col>
             </Row>
+
+            <Row gutter={24}>
+              <Col span={3}>
+                <div>费用信息</div>
+              </Col>
+              <Col span={21}>
+                <Row>
+                  <Col span={12}>
+                    <Form.Item
+                      style={{ marginBottom: 0 }}
+                      name="labour_amount"
+                      label="运输劳务费"
+                      rules={[
+                        {
+                          required: true,
+                          message: '运输劳务费未输入',
+                        },
+                        {
+                          validator: validateLabourAmount,
+                        },
+                      ]}
+                    >
+                      <Input placeholder="请输入承运人劳务费" />
+                    </Form.Item>
+                    <div className="ant-row ant-form-item">
+                      <div style={{ position: 'relative', left: '86px' }}>
+                        <span style={{ lineHeight: 1.8 }}>
+                          *运输劳务费不含油气、过路费等，即通过平台支付部分
+                        </span>
+                        <span style={{ display: 'block', color: '#00b0b5' }}>
+                          含税开票金额(元)：100
+                        </span>
+                      </div>
+                    </div>
+                  </Col>
+                  <Col span={12}>
+                    <Row>
+                      <Col span={24}>
+                        <Form.Item name="carrier_name" label="承运人">
+                          {/* <Input disabled placeholder="请选择承运人" /> */}
+                          <Search
+                            readOnly
+                            placeholder="请选择承运人"
+                            allowClear
+                            onSearch={openSelectCarrierModal}
+                            enterButton="选择"
+                            style={{ width: '100%' }}
+                          />
+                        </Form.Item>
+                      </Col>
+                      <span
+                        style={{
+                          position: 'relative',
+                          top: '-22px',
+                          left: '52px',
+                          display: 'block',
+                          width: '86%',
+                        }}
+                      >
+                        *若承运人未完成注册认证及运输工具的添加，可暂不指定，稍后通过编辑功能再指定承运人
+                      </span>
+                    </Row>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col span={12}>
+                    <Form.Item name="remark" label="备注">
+                      <Input.TextArea placeholder="请输入备注" />
+                    </Form.Item>
+                  </Col>
+                </Row>
+                {objState.payeeSwitch && (
+                  <Row span={24}>
+                    <Col span={12}>
+                      <Form.Item label="运费收款人">
+                        <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
+                          <Col className={styles.recipient} span={10}>
+                            承运人：
+                            {form
+                              .getFieldValue('carrier_name')
+                              .replace(/\d+/g, '')}
+                          </Col>
+                          {form.getFieldValue('payee_uin') ? (
+                            <Col className={`${styles.recipient}`} span={10}>
+                              {form.getFieldValue('payee_name')}
+                            </Col>
+                          ) : (
+                            <Col
+                              className={`${styles.recipient} ${styles.on}`}
+                              span={10}
+                              onClick={openPayerNewrModal}
+                            >
+                              <UserAddOutlined />
+                              新增1名收款人
+                            </Col>
+                          )}
+
+                          {form.getFieldValue('payee_uin') && (
+                            <CloseCircleFilled
+                              style={{
+                                position: 'absolute',
+                                right: 0,
+                                top: '-8px',
+                                fontSize: '20px',
+                                color: '#00b0b5',
+                              }}
+                              onClick={handleRemovePayee}
+                            />
+                          )}
+                        </Row>
+                      </Form.Item>
+                      <span
+                        style={{
+                          position: 'relative',
+                          top: '-18px',
+                          left: '86px',
+                          display: 'block',
+                        }}
+                      >
+                        *承运人为默认收款人,不可删改,最多允许额外新增1名收款人
+                      </span>
+                    </Col>
+                  </Row>
+                )}
+                <Row>
+                  <Col span={24}>
+                    <Form.Item hidden name="carrier_uin">
+                      <Input />
+                    </Form.Item>
+                    <Form.Item hidden name="transport_name">
+                      <Input />
+                    </Form.Item>
+                    <Form.Item hidden name="transport_uin">
+                      <Input />
+                    </Form.Item>
+                    <Form.Item hidden name="trans_vehicle_id">
+                      <Input />
+                    </Form.Item>
+                    <Form.Item hidden name="trans_vehicle_name">
+                      <Input />
+                    </Form.Item>
+                    <Form.Item hidden name="payee_name">
+                      <Input />
+                    </Form.Item>
+                    <Form.Item hidden name="payee_uin">
+                      <Input />
+                    </Form.Item>
+                    <Form.Item hidden name="title">
+                      <Input />
+                    </Form.Item>
+                  </Col>
+                </Row>
+              </Col>
+            </Row>
+
             <Row>
-              <Col span={12}>
+              <Col span={24} style={{ 'padding-top': '20px' }}>
                 <Button type="primary" htmlType="submit">
                   保存信息
                 </Button>
@@ -1238,5 +1260,5 @@ const FormIndex = props => {
     </div>
   );
 };
-
-export default connect(mapStateToProps, mapDispatchToProps)(FormIndex);
+const memoFormIndex = React.memo(FormIndex);
+export default connect(mapStateToProps, mapDispatchToProps)(memoFormIndex);

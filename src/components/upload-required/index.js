@@ -146,5 +146,5 @@ const UploadRequired = props => {
     </div>
   );
 };
-
-export default connect(mapStateToProps, mapDispatchToProps)(UploadRequired);
+const memoUploadRequired = React.memo(UploadRequired);
+export default connect(mapStateToProps, mapDispatchToProps)(memoUploadRequired);

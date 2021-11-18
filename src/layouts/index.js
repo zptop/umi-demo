@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {memo, useState, useEffect } from 'react';
 import { Layout, Dropdown, Menu, Tabs } from 'antd';
 import { forEach, hasChild } from '../util/tools';
 import { Link, history } from 'umi';
@@ -25,7 +25,7 @@ const namespace = 'user';
 const mapStateToProps = state => {
   return {
     userInfo: state[namespace].userInfo,
-    access: state[namespace].access,
+    access: state[namespace].access
   };
 };
 const mapDispatchToProps = dispatch => {
@@ -50,6 +50,7 @@ const downClick = ({ key }) => {
       if (res.code == 0) {
         history.push('/login');
         localStorage.removeItem('x-auth-token');
+        localStorage.removeItem('userInfoData');
       }
     });
   }
@@ -115,15 +116,12 @@ const BasicLayout = props => {
         }),
       );
     }
-    // if (ind && arr) {
-    //     res[ind].sub_items = arr;
-    // }
     return res;
   };
 
   useEffect(() => {
-    let menuList = getMenuByRouter(siderMenu, props.access);
-    setMenuList(menuList);
+      let menuList = getMenuByRouter(siderMenu, props.access);
+      setMenuList(menuList);
   }, [props.access]);
 
   const toggle = () => {
@@ -147,7 +145,7 @@ const BasicLayout = props => {
           <img src={require('../assets/logo.png')} />
           水陆联运网
         </div>
-        <Menu defaultSelectedKeys={['/car/index']} mode="inline" theme="dark">
+        <Menu defaultSelectedKeys={['/car/index']} selectedKeys={[props.location.pathname]}  mode="inline" theme="dark">
           {makeSiderMenu(menuList)}
         </Menu>
       </Sider>

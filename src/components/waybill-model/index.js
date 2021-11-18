@@ -16,7 +16,7 @@ import {
   Drawer,
 } from 'antd';
 import { history } from 'umi';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   RetweetOutlined,
   DownOutlined,
@@ -27,7 +27,12 @@ import {
   WarningOutlined,
   CloudSyncOutlined,
 } from '@ant-design/icons';
-import { formatSelectedOptions, accDiv, timeCutdown } from '../../util/tools';
+import {
+  formatDateYMD,
+  formatSelectedOptions,
+  accDiv,
+  timeCutdown,
+} from '../../util/tools';
 import {
   isPayToBank,
   subPayMore,
@@ -41,27 +46,37 @@ import { connect } from 'dva';
 import Details from './detail';
 import UploadRequired from '../upload-required';
 import UploadNoRequired from '../upload-no-required';
+import BatchImport from './batch-import';
+import ExportList from './export-list';
 const { confirm } = Modal;
 const namespace = 'user';
-const namespace_2 = 'waybill';
+const namespace_waybill = 'waybill';
 let isAjax = false,
   waybillNoArr = []; //提交的运单
 
 //将page层和model层进行链接，返回model中的数据，并将数据绑定到this.props中
 const mapStateToProps = state => {
-  const userInfo = state[namespace].userInfo,
-    totalPage = state[namespace_2].totalPage,
-    total_wait_amount = state[namespace_2].total_wait_amount,
-    total_labour_amount = state[namespace_2].total_labour_amount,
-    loading = state[namespace_2].loading,
-    dataList = state[namespace_2].waybillList;
+  let { userInfo } = state[namespace];
+  let {
+    totalPage,
+    total_wait_amount,
+    total_labour_amount,
+    loading,
+    waybillList,
+    contractData,
+    elecContractFlag,
+    elecContractLoading,
+  } = state[namespace_waybill];
   return {
     userInfo,
     totalPage,
     total_wait_amount,
     total_labour_amount,
     loading,
-    dataList,
+    waybillList,
+    contractData,
+    elecContractFlag,
+    elecContractLoading,
   };
 };
 
@@ -69,7 +84,7 @@ const mapDispatchToProps = dispatch => {
   return {
     getWaybillListFn: value => {
       dispatch({
-        type: namespace_2 + '/getWaybillListModel',
+        type: namespace_waybill + '/getWaybillListModel',
         value,
       });
     },
@@ -79,11 +94,40 @@ const mapDispatchToProps = dispatch => {
         value,
       });
     },
+    getContractFn: value => {
+      dispatch({
+        type: namespace_waybill + '/getContractModel',
+        value,
+      });
+    },
+    sureContractFn: value => {
+      dispatch({
+        type: namespace_waybill + '/sureContractModel',
+        value,
+      });
+    },
+    outexportFn: value => {
+      dispatch({
+        type: namespace_waybill + '/outexportModel',
+        value,
+      });
+    },
   };
 };
 
 const WaybillIndex = props => {
-  let { transportType } = props;
+  let {
+    addForm,
+    payPath,
+    userInfo,
+    totalPage,
+    total_wait_amount,
+    total_labour_amount,
+    loading,
+    waybillList,
+    transportType,
+    exportWaybillType,
+  } = props;
   const [form] = Form.useForm();
   const [payFormData] = Form.useForm();
 
@@ -103,6 +147,26 @@ const WaybillIndex = props => {
     pay_more_err_flag_3: false, //余额不足
     isDetailDrawer: false, //运单详情
   });
+
+  //合同管理弹框
+  const [elecContractModal, setElecContractModal] = useState(false);
+
+  //批量上传弹框
+  const [batchImportFlag, setBatchImportFlag] = useState(false);
+  const handleBatchImportModal = () => {
+    setBatchImportFlag(false);
+  };
+
+  //导出列表
+  const [exportListFlag, setExportListFlag] = useState(false);
+  const handleExportModal = () => {
+    setExportListFlag(false);
+  };
+
+  //初始化钱包余额、待付运输劳务费、总运输劳务费
+  useEffect(() => {
+    getWalletFn();
+  }, [transportType]);
 
   //走资金-模态框控制
   const [isRequiredModalVisible, setIsRequiredModalVisible] = useState(false);
@@ -135,11 +199,31 @@ const WaybillIndex = props => {
       ...objState,
       waybill_no,
     });
-    if (props.userInfo.PAYMENTREQUIRED == 1) {
+    if (userInfo.PAYMENTREQUIRED == 1) {
       setIsRequiredModalVisible(true);
     } else {
       setIsNoRequiredModalVisible(true);
     }
+  };
+
+  //打开合同管理
+  const handleRowContract = waybill_no => {
+    setObjState({
+      ...objState,
+      waybill_no,
+    });
+    setElecContractModal(true);
+    props.getContractFn({ waybill_no });
+  };
+
+  //确认合同
+  const handleContractOk = () => {
+    props.sureContractFn({ waybill_no: objState.waybill_no });
+  };
+
+  //关闭合同
+  const handleContractCancel = () => {
+    setElecContractModal(false);
   };
 
   //金额
@@ -169,11 +253,6 @@ const WaybillIndex = props => {
 
   //搜索
   const [copySubmitData, setCopySubmitData] = useState({});
-
-  //初始化钱包余额、待付运输劳务费、总运输劳务费
-  useEffect(() => {
-    getWalletFn();
-  }, [transportType]);
 
   //初始化批量付款弹窗
   const initPayment = () => {
@@ -259,10 +338,8 @@ const WaybillIndex = props => {
         setAmount({
           ...amount,
           available_amount: accDiv(obj.available_amount, 100).toFixed(2),
-          total_wait_amount: accDiv(props.total_wait_amount, 100).toFixed(2),
-          total_labour_amount: accDiv(props.total_labour_amount, 100).toFixed(
-            2,
-          ),
+          total_wait_amount: accDiv(total_wait_amount, 100).toFixed(2),
+          total_labour_amount: accDiv(total_labour_amount, 100).toFixed(2),
         });
         setPayMore({
           ...payMore,
@@ -475,7 +552,6 @@ const WaybillIndex = props => {
   const onFinish = values => {
     values = {
       ...values,
-      ...selectDateName,
       page: objState.pageNum,
       num: objState.pageSize,
       transportType,
@@ -551,6 +627,13 @@ const WaybillIndex = props => {
     switch (Number(e.key)) {
       case 1:
         console.log('跳转到付款页面');
+        history.push({
+          pathname: payPath,
+          query: {
+            waybill_no,
+            title: transportType == 1 ? '车辆付款' : '船舶付款',
+          },
+        });
         break;
       case 2:
         console.log('打开右抽屉-费用明细');
@@ -563,7 +646,7 @@ const WaybillIndex = props => {
       case 4:
         //复制运单
         history.push({
-          pathname: props.addForm,
+          pathname: addForm,
           query: {
             waybill_no,
             title: transportType == 1 ? '复制车辆运单' : '复制船舶运单',
@@ -594,7 +677,7 @@ const WaybillIndex = props => {
       isWaybillNotPay = true; //运单不具备付款条件  true显示，false不显示
 
     //过滤选中的项
-    // let intersectionArr = [...props.dataList].filter(x => [...objState.selectedRowKeys].some(y => y === x.waybill_no));
+    // let intersectionArr = [...waybillList].filter(x => [...objState.selectedRowKeys].some(y => y === x.waybill_no));
     objState.selectedRows.forEach((item, index) => {
       //1打款到银行卡  0打款到钱包
       if (item.business_payment_card == 1) {
@@ -732,9 +815,6 @@ const WaybillIndex = props => {
       });
   };
 
-  //批量导入运单
-  const openImportMoreWaybill = () => {};
-
   //批量删除运单
   const batchDelMore = () => {
     // if (this.$store.state.user.shipperauditstatus != 1) {
@@ -764,9 +844,7 @@ const WaybillIndex = props => {
   //批量操作
   const batchMenu = (
     <Menu onClick={handleMenuClick}>
-      {props.userInfo.PAYMENTREQUIRED == 1 && (
-        <Menu.Item key="1">批量付款</Menu.Item>
-      )}
+      {userInfo.PAYMENTREQUIRED == 1 && <Menu.Item key="1">批量付款</Menu.Item>}
       {transportType == 1 && <Menu.Item key="2">批量导入运单</Menu.Item>}
       <Menu.Item key="3">批量删除运单</Menu.Item>
     </Menu>
@@ -777,10 +855,36 @@ const WaybillIndex = props => {
         openPayMore();
         break;
       case 2:
-        openImportMoreWaybill();
+        setBatchImportFlag(true);
         break;
       case 3:
         batchDelMore();
+        break;
+    }
+  }
+
+  //导出操作
+  const exportMenu = (
+    <Menu onClick={handleExportMenu}>
+      <Menu.Item key="1">导出</Menu.Item>
+      <Menu.Item key="2">导出任务</Menu.Item>
+    </Menu>
+  );
+  function handleExportMenu(e) {
+    switch (e.key * 1) {
+      case 1:
+        let formData = form.getFieldsValue(true);
+        let searchData = {
+          page: objState.pageNum,
+          num: objState.pageSize,
+          transportType,
+          ...formData,
+        };
+        formatSelectedOptions(searchData);
+        props.outexportFn(searchData);
+        break;
+      case 2:
+        setExportListFlag(true);
         break;
     }
   }
@@ -806,7 +910,7 @@ const WaybillIndex = props => {
               disabled={waybill_editable != 1}
               onClick={_ => {
                 history.push({
-                  pathname: props.addForm,
+                  pathname: addForm,
                   query: {
                     waybill_no,
                     title: transportType == 1 ? '编辑车辆运单' : '编辑船舶运单',
@@ -823,10 +927,14 @@ const WaybillIndex = props => {
             >
               上传资料
             </Button>
-            {props.userInfo.PAYMENTREQUIRED == 1 &&
-              props.userInfo.CONTRACTSIGN == 1 && (
-                <Button type="primary">合同管理</Button>
-              )}
+            {userInfo.PAYMENTREQUIRED == 1 && userInfo.CONTRACTSIGN == 1 && (
+              <Button
+                type="primary"
+                onClick={() => handleRowContract(waybill_no)}
+              >
+                合同管理
+              </Button>
+            )}
             <Dropdown
               overlay={menu(waybill_no, waybill_candelete)}
               trigger={['click']}
@@ -887,16 +995,20 @@ const WaybillIndex = props => {
     {
       title: '提货时间',
       width: 90,
-      dataIndex: 'load_time',
+      render: (text, record, index) => {
+        return <div>{formatDateYMD(record.load_time)}</div>;
+      },
     },
     {
       title: '到货时间',
       width: 90,
-      dataIndex: 'unload_time',
+      render: (text, record, index) => {
+        return <div>{formatDateYMD(record.unload_time)}</div>;
+      },
     },
     {
       title: () => {
-        return props.userInfo.PAYMENTREQUIRED == 1
+        return userInfo.PAYMENTREQUIRED == 1
           ? '待付/已付/运输劳务费(元)'
           : '运输劳务费(元)';
       },
@@ -906,17 +1018,24 @@ const WaybillIndex = props => {
     {
       title: '含税开票金额(元)',
       width: 100,
-      dataIndex: 'invoice_amount',
+      render: (text, record, index) => {
+        return <div>{accDiv(record.invoice_amount, 100).toFixed(2)}</div>;
+      },
     },
     {
       title: '应付税金(元)',
       width: 100,
-      dataIndex: 'taxable_amount',
+      render: (text, record, index) => {
+        return <div>{accDiv(record.taxable_amount, 100).toFixed(2)}</div>;
+      },
     },
     {
       title: '撮合服务费(元)',
       width: 100,
       dataIndex: 'svr_fee',
+      render: (text, record, index) => {
+        return <div>{accDiv(record.svr_fee, 100).toFixed(2)}</div>;
+      },
     },
 
     {
@@ -955,7 +1074,6 @@ const WaybillIndex = props => {
     <div className={styles.content}>
       <Form
         className="login-form"
-        initialValues={{ remember: true }}
         form={form}
         onFinish={onFinish}
         initialValues={{
@@ -1123,11 +1241,11 @@ const WaybillIndex = props => {
           <Col className="gutter-row" span={6}>
             <Button
               type="primary"
-              to={props.addForm}
+              to={addForm}
               className="ant-btn ant-btn-primary"
               onClick={_ => {
                 history.push({
-                  pathname: props.addForm,
+                  pathname: addForm,
                   query: {
                     title: transportType == 1 ? '新增车辆运单' : '新增船舶运单',
                   },
@@ -1136,7 +1254,7 @@ const WaybillIndex = props => {
             >
               新增
             </Button>
-            {props.userInfo.FROMAPI != 1 && (
+            {userInfo.FROMAPI != 1 && (
               <Dropdown overlay={batchMenu} trigger={['click']}>
                 <Button type="primary">
                   批量操作 <DownOutlined />
@@ -1144,16 +1262,20 @@ const WaybillIndex = props => {
               </Dropdown>
             )}
 
-            <Button icon={<DownloadOutlined />}>导出</Button>
+            {/* <Button icon={<DownloadOutlined />}>导出</Button> */}
+            <Dropdown overlay={exportMenu} trigger={['click']}>
+              <Button type="primary">
+                导出操作 <DownOutlined />
+              </Button>
+            </Dropdown>
           </Col>
         </Row>
       </Form>
       <Table
-        className={styles.tableList}
         rowSelection={rowSelection}
         columns={columns}
-        dataSource={props.dataList}
-        loading={props.loading}
+        dataSource={waybillList}
+        loading={loading}
         rowKey={record => `${record.waybill_no}`}
         scroll={{ x: 2100 }}
         sticky
@@ -1162,14 +1284,14 @@ const WaybillIndex = props => {
           current: objState.pageNum,
           pageSize: objState.pageSize,
           pageSizeOptions: [10, 20, 50, 100],
-          total: props.totalPage,
+          total: totalPage,
           onChange: pageChange,
           onShowSizeChange: onShowSizeChange,
         }}
       />
       <Row style={{ position: 'absolute', bottom: '6px' }}>
         <Col span={24}>
-          {props.userInfo.PAYMENTREQUIRED == 1 && (
+          {userInfo.PAYMENTREQUIRED == 1 && (
             <span>当前已勾选的运单累计待付：￥{amount.total_wait_pay}，</span>
           )}
           <span>钱包可用余额：￥{amount.available_amount}</span>
@@ -1358,8 +1480,69 @@ const WaybillIndex = props => {
           closeModelFromChild={closeModel}
         />
       </Modal>
+
+      {/* 合同管理 */}
+      <Modal
+        title="确认合同"
+        okText="确定合同"
+        cancelText="关闭"
+        width={1000}
+        className={styles.content_modal}
+        visible={elecContractModal}
+        onOk={handleContractOk}
+        onCancel={handleContractCancel}
+        footer={
+          props.contractData && props.contractData.contract_sign_flag == 0
+            ? [
+                <Button key="back" onClick={handleContractCancel}>
+                  关闭
+                </Button>,
+                <Button key="submit" type="primary" onClick={handleContractOk}>
+                  确定合同
+                </Button>,
+              ]
+            : [
+                <Button key="back" onClick={handleContractCancel}>
+                  关闭
+                </Button>,
+              ]
+        }
+      >
+        {/\.pdf/gi.test(props.contractData.contract_pic) ? (
+          <iframe src={props.contractData.contract_pic} width="100%"></iframe>
+        ) : (
+          <a href={props.contractData.contract_pic}>
+            <img src={props.contractData.contract_pic} />
+          </a>
+        )}
+      </Modal>
+
+      {/* 批量上传 */}
+      <Modal
+        title="批量导入运单"
+        width={800}
+        visible={batchImportFlag}
+        onCancel={handleBatchImportModal}
+        footer={null}
+      >
+        <BatchImport batchImportFlag={batchImportFlag} />
+      </Modal>
+
+      {/*导出列表*/}
+      <Modal
+        title="导出列表"
+        width={800}
+        visible={exportListFlag}
+        onCancel={handleExportModal}
+        footer={null}
+      >
+        <ExportList
+          exportListFlag={exportListFlag}
+          exportWaybillType={exportWaybillType}
+        />
+      </Modal>
     </div>
   );
 };
-
-export default connect(mapStateToProps, mapDispatchToProps)(WaybillIndex);
+const memoWaybillIndex = React.memo(WaybillIndex);
+export default connect(mapStateToProps, mapDispatchToProps)(memoWaybillIndex);

@@ -184,13 +184,105 @@ export async function uploadNoRequiredSubmit(data, url) {
   });
 }
 
-
 /**
  * 获取支付渠道
  */
-export async function getPayChannel(params){
-  return request('/payinfo/getPayChanCode',{
-    method:'GET',
-    params
-  })
+export async function getPayChannel(params) {
+  return request('/payinfo/getPayChanCode', {
+    method: 'GET',
+    params,
+  });
+}
+
+/**
+ * 获取电子合同
+ */
+export async function getContract(params) {
+  return request('/waybill/contract_info', {
+    method: 'GET',
+    params,
+  });
+}
+
+/**
+ * 确认电子合同
+ */
+export async function sureContract(params) {
+  return request('/waybill/contract_save', {
+    method: 'GET',
+    params,
+  });
+}
+
+/**
+ * 获取批量导入列表
+ */
+export async function getBatchImportList(params) {
+  return request('/excel/get_list', {
+    method: 'GET',
+    params,
+  });
+}
+
+/**
+ * 导出
+ */
+export async function outexportFn(params) {
+  return request(
+    params.transportType == 1 ? 'car/outexport' : 'ship/outexport',
+    {
+      method: 'GET',
+      params,
+    },
+  );
+}
+
+/**
+ * 导出列表
+ */
+export async function getExoprtList(params) {
+  return request('/Export/get_export_task_list', {
+    method: 'GET',
+    params,
+  });
+}
+
+/**
+ * 获取收款人列表
+ */
+export async function getPayeePayList(params) {
+  return request('/waybill/waybill_payee', {
+    method: 'GET',
+    params,
+  });
+}
+
+/**
+ * 付款申请记录列表
+ */
+export async function getApplyRecordList(params) {
+  return request('/apply/waybill_list', {
+    method: 'GET',
+    params,
+  });
+}
+
+/**
+ * 获取短信验证码-付款页面
+ */
+export async function getSmsCodeFromPay(params) {
+  return request('/car/sendsms', {
+    method: 'GET',
+    params,
+  });
+}
+
+/**
+ * 获取收款人信息-付款页面
+ */
+export async function getInfoPersonFromPay(params) {
+  return request('/waybill/get_info', {
+    method: 'GET',
+    params,
+  });
 }

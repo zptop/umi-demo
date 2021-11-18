@@ -1,3 +1,24 @@
+.form_box {
+  :global {
+    .ant-col-16 {
+      border-right: 15px solid #f9fafb;
+    }
+    .ant-col-3{
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-right: 1px solid #eee;
+    }
+    .ant-col-21{
+      padding: 20px 0;
+    }
+  }
+  .goods_info_style {
+    border-top: 15px solid #f9fafb;
+    border-bottom: 15px solid #f9fafb;
+  }
+}
+
 .content {
   position: relative;
   :global {
@@ -10,6 +31,10 @@
       }
     }
   }
+}
+.select_after{
+  margin: 0;
+  height: 30px;
 }
 
 .split_line {
@@ -144,14 +169,14 @@
   display: flex;
   & > div {
     width: 230px;
-    .detail_info_title{
+    .detail_info_title {
       width: auto;
     }
   }
 }
-.detail_col_8{
-  &>div{
-    .detail_info_title{
+.detail_col_8 {
+  & > div {
+    .detail_info_title {
       width: 68px;
     }
   }
@@ -188,23 +213,73 @@
   margin: 10px 0 15px 0;
 }
 
-.img_list{
+.img_list {
   display: flex;
   flex-wrap: wrap;
-  &>div{
+  & > div {
     margin: 4px;
   }
-  img{
+  img {
     width: 70px;
     height: 70px;
     margin-right: 10px;
     cursor: pointer;
   }
 }
-.no_info{
+.no_info {
   position: absolute;
   top: 50%;
   left: 50%;
   margin: -50px 0 0 -50px;
   z-index: 100;
+}
+
+.content_modal {
+  :global {
+    .ant-modal-content {
+      height: 650px;
+    }
+    .ant-modal-body {
+      iframe {
+        height: 474px;
+      }
+    }
+  }
+  .loading_modal {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 100;
+  }
+}
+
+//批量导入运单
+.batch_modal {
+  position: relative;
+  .loading {
+    position: absolute;
+    z-index: 100;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+  }
+  .batch_import_title {
+    padding-bottom: 20px;
+    :global {
+      .ant-col-18,.ant-col-4 {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        .ant-btn-primary {
+          margin: 0 5px 0 12px;
+        }
+      }
+      .ant-upload-list.ant-upload-list-text {
+        display: none;
+      }
+    }
+  }
 }

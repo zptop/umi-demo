@@ -1,4 +1,5 @@
-import { message } from 'antd';
+import { message, Modal } from 'antd';
+const { confirm } = Modal;
 import {
   getWaybillList,
   submitForm,
@@ -14,9 +15,18 @@ import {
   delImgFromVehicle,
   uploadNoRequiredSubmit,
   getPayChannel,
+  getContract,
+  sureContract,
+  getBatchImportList,
+  outexportFn,
+  getExoprtList,
+  getPayeePayList,
+  getApplyRecordList,
+  getSmsCodeFromPay,
+  getInfoPersonFromPay,
 } from '../sevice/waybill';
-import { formatDateYMD, accMul, accDiv } from '../util/tools';
-import { history } from 'umi';
+import { formatDateYMD, accMul, accDiv, timeCutdown } from '../util/tools';
+import { history, getDvaApp } from 'umi';
 export default {
   namespace: 'waybill',
   state: {
@@ -36,6 +46,19 @@ export default {
     payMentFlowList: [], //支付流水或付款信息列表
     payChannelArr: [], //银行支付列表
     isNoRequiredModalVisible: false, //上传资料，不走资金弹框显示控制
+    contractData: '', //电子合同地址
+    elecContractFlag: false, //电子合同弹框
+    batchImportList: [], //批量导入运单列表
+    batch_loading: false, //批量导入运单列表loading
+    batchTtotalPage: 0, //批量导入运单列表totalPage
+    exportImportList: [], //导出运单列表
+    export_loading: false, //导出运单列表loading
+    exportTtotalPage: 0, //导出运单列表totalPage
+    payeeList: [], //付款页面，收款人列表
+    applyRecordList: [], //付款页面，付款申请记录
+    getBtnText: '获取验证码', //付款页面
+    is_sms_disabled: false, //付款页面,获取短信验证码点击
+    payObjInfo: {}, //付款页面，收款人信息
   },
   //一些正常的同步方法
   reducers: {
@@ -116,7 +139,82 @@ export default {
     setIsNoRequiredModalVisible(state) {
       return {
         ...state,
-        isNoRequiredModalVisible: false
+        isNoRequiredModalVisible: false,
+      };
+    },
+    setContractPic(state, action) {
+      return {
+        ...state,
+        contractData: action.payload,
+      };
+    },
+    setBatchLoadingTrue(state) {
+      return {
+        ...state,
+        batch_loading: true,
+      };
+    },
+    setBatchLoadingFalse(state) {
+      return {
+        ...state,
+        batch_loading: false,
+      };
+    },
+    setBatchImportList(state, action) {
+      return {
+        ...state,
+        batchImportList: action.payload.data,
+        batchTtotalPage: action.payload.total,
+      };
+    },
+    setExportLoadingTrue(state) {
+      return {
+        ...state,
+        export_loading: true,
+      };
+    },
+    setExportLoadingFalse(state) {
+      return {
+        ...state,
+        export_loading: false,
+      };
+    },
+    setExportImportList(state, action) {
+      return {
+        ...state,
+        exportImportList: action.payload.data,
+        exportTtotalPage: action.payload.total,
+      };
+    },
+    setPayeeList(state, action) {
+      return {
+        ...state,
+        payeeList: action.payload,
+      };
+    },
+    setApplyRecordList(state, action) {
+      return {
+        ...state,
+        applyRecordList: action.payload,
+      };
+    },
+    setIsSmsDisabled(state, action) {
+      return {
+        ...state,
+        is_sms_disabled: action.payload,
+      };
+    },
+    setGetBtnText(state, action) {
+      return {
+        ...state,
+        getBtnText: action.payload,
+      };
+    },
+    setPayObjInfo(state, action) {
+      console.log('action:',action)
+      return {
+        ...state,
+        payObjInfo: action.payload,
       };
     },
   },
@@ -124,24 +222,18 @@ export default {
   effects: {
     //获取运单列表
     *getWaybillListModel({ value }, { call, put }) {
-      yield put({ type: 'setLoadingTrue' });
+      yield put({
+        type: 'setLoadingTrue',
+      });
       const res = yield call(
         getWaybillList,
         value,
         value.transportType == 1 ? '/Car/get_list' : '/Ship/get_list',
       );
       if (res.code == 0) {
-        yield put({ type: 'setLoadingFalse' });
-        if (res.data && res.data.length > 0) {
-          for (let item of res.data) {
-            item.load_time = formatDateYMD(item.load_time);
-            item.unload_time =
-              item.unload_time == 0 ? '' : formatDateYMD(item.unload_time);
-            item.invoice_amount = accDiv(item.invoice_amount, 100).toFixed(2);
-            item.taxable_amount = accDiv(item.taxable_amount, 100).toFixed(2);
-            item.svr_fee = accDiv(item.svr_fee, 100).toFixed(2);
-          }
-        }
+        yield put({
+          type: 'setLoadingFalse',
+        });
         yield put({
           type: 'setWaybillList',
           data: res,
@@ -273,7 +365,10 @@ export default {
     *addpayeeModel({ value }, { call, put }) {
       const res = yield call(addpayee, value);
       if (res.code == 0) {
-        yield put({ type: 'getPayeeListModel', value });
+        yield put({
+          type: 'getPayeeListModel',
+          value,
+        });
       } else {
         message.warning(res.msg || '系统错误');
       }
@@ -281,7 +376,9 @@ export default {
 
     //初始化额外收款人列表
     *getPayeeListModel({ value }, { call, put }) {
-      const res = yield call(getPayeeList, { waybill_no: value.waybill_no });
+      const res = yield call(getPayeeList, {
+        waybill_no: value.waybill_no,
+      });
       if (res.code == 0) {
         yield put({
           type: 'setPayeeInfo',
@@ -354,7 +451,9 @@ export default {
       );
       if (res.code == 0) {
         message.success('保存成功');
-        yield put({type:'setIsNoRequiredModalVisible'});
+        yield put({
+          type: 'setIsNoRequiredModalVisible',
+        });
       } else {
         message.warning(res.msg || '保存失败');
       }
@@ -370,6 +469,163 @@ export default {
         });
       }
     },
+
+    //获取电子合同
+    *getContractModel({ value }, { call, put }) {
+      const res = yield call(getContract, value);
+      if (res.code == 0) {
+        yield put({
+          type: 'setContractPic',
+          payload: res.data,
+        });
+      }
+    },
+
+    //确认电子合同
+    *sureContractModel({ value }, { call, put }) {
+      let store = getDvaApp()._store;
+      confirm({
+        title: '提示',
+        content: '请确认运单数据无误且与合同内数据一致后进行签署',
+        okText: '核对无误，签署',
+        cancelText: '取消',
+        onOk: () => {
+          store.runSaga(function*() {
+            const res = yield call(sureContract, value);
+            if (res.code == 0) {
+              message.success('签署成功');
+            } else {
+              message.warning('操作失败');
+            }
+          });
+        },
+        onCancel: () => {
+          //取消
+        },
+      });
+    },
+
+    //获取批量导入运单列表
+    *getBatchImportListModel({ value }, { call, put }) {
+      yield put({
+        type: 'setBatchLoadingTrue',
+      });
+      const res = yield call(getBatchImportList, value);
+      if (res.code == 0) {
+        yield put({
+          type: 'setBatchLoadingFalse',
+        });
+        yield put({
+          type: 'setBatchImportList',
+          payload: res,
+        });
+      } else {
+        message.error(res.msg || '系统错误');
+      }
+    },
+
+    //导出
+    *outexportModel({ value }, { call, put }) {
+      const res = yield call(outexportFn, value);
+      if (res.code == 0) {
+        message.success(res.msg);
+      } else {
+        message.error(res.msg || '操作失败');
+      }
+    },
+
+    //获取导出列表
+    *getExoprtModel({ value }, { call, put }) {
+      yield put({
+        type: 'setExportLoadingTrue',
+      });
+      const res = yield call(getExoprtList, value);
+      if (res.code == 0) {
+        yield put({
+          type: 'setExportLoadingFalse',
+        });
+        yield put({
+          type: 'setExportImportList',
+          payload: res,
+        });
+      } else {
+        message.error(res.msg || '系统错误');
+      }
+    },
+
+    //获取收款人列表
+    *getPayeePayListModel({ value }, { call, put }) {
+      const res = yield call(getPayeePayList, value);
+      if (res.code == 0) {
+        yield put({
+          type: 'setPayeeList',
+          payload: res.data,
+        });
+      } else {
+        message.error(res.msg || '系统错误');
+      }
+    },
+
+    //付款申请记录列表
+    *getApplyRecordListModel({ value }, { call, put }) {
+      const res = yield call(getApplyRecordList, value);
+      if (res.code == 0) {
+        yield put({
+          type: '/setApplyRecordList',
+          payload: res.data,
+        });
+      } else {
+        message.error(res.msg || '系统错误');
+      }
+    },
+
+    //付款页面-倒计时
+    *getSmsCodeFromPayModel({ value }, { call, put }) {
+      const res = yield call(getSmsCodeFromPay, value);
+      if (res.code == 0) {
+        yield put({
+          type: '/setIsSmsDisabled',
+          payload: true,
+        });
+        let store = getDvaApp._store;
+        let t = timeCutdown(60, 1000, n => {
+          store.runSaga(function*() {
+            if (n <= 0) {
+              yield put({
+                type: '/setIsSmsDisabled',
+                payload: true,
+              });
+              yield put({
+                type: '/setGetBtnText',
+                payload: '获取验证码',
+              });
+            } else {
+              yield put({
+                type: '/setGetBtnText',
+                payload: '剩余' + n + '秒',
+              });
+            }
+          });
+        });
+      } else {
+        message.error(res.msg || '系统错误');
+      }
+    },
+
+    //付款页面-获取收款人信息
+    *getInfoPersonModel({ value }, { call, put }) {
+      const res = yield call(getInfoPersonFromPay, value);
+      console.log('res:',res)
+      if (res.code == 0) {
+        console.log('1111')
+        yield put({
+          type: '/setPayObjInfo',
+          payload: res.data,
+        });
+      } else {
+        message.error(res.msg || '系统错误');
+      }
+    },
   },
   subscriptions: {
     setup({ dispatch, history }) {
@@ -377,24 +633,29 @@ export default {
         if (pathname == '/car/index' || pathname == '/ship/index') {
           dispatch({
             type: 'getWaybillListModel',
-            value: { transportType: pathname == '/car/index' ? '1' : '2' },
+            value: {
+              transportType: pathname == '/car/index' ? '1' : '2',
+            },
           });
         }
         if (pathname == '/car/form' || pathname == '/ship/form') {
           const waybill_no = history.location.query.waybill_no;
           dispatch({
             type: 'getCommonInfoModel',
-            value: { transport_type: pathname == '/car/form' ? '1' : '2' },
+            value: {
+              transport_type: pathname == '/car/form' ? '1' : '2',
+            },
           });
           if (waybill_no) {
             dispatch({
               type: 'getWaybillDetailModel',
-              value: { waybill_no },
+              value: {
+                waybill_no,
+              },
             });
           }
         }
       });
     },
-    
   },
 };

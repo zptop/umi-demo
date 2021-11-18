@@ -68,7 +68,6 @@ const UploadNoRequired = props => {
   }, [props.waybill_no]);
 
   useEffect(() => {
-    console.log('props:',props)
     if (props && Object.keys(props.waybillDetailInfo).length) {
       let { waybill_amount, pay_style, pay_channel } = props.waybillDetailInfo;
       form.setFieldsValue({
@@ -136,7 +135,6 @@ const UploadNoRequired = props => {
   //子组件传过来的回单图片
   const replyImgFromChild = picList => {
     reply_media_ids.current = picList.map(item => item.uid).join(',');
-    console.log('reply_media_ids:', reply_media_ids);
   };
 
   //子组件传过来的合同图片
@@ -340,5 +338,5 @@ const UploadNoRequired = props => {
     </div>
   );
 };
-
-export default connect(mapStateToProps, mapDispatchToProps)(UploadNoRequired);
+const memoUploadNoRequired = React.memo(UploadNoRequired);
+export default connect(mapStateToProps, mapDispatchToProps)(memoUploadNoRequired);

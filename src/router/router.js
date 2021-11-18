@@ -1,28 +1,29 @@
 const routes = [
     { path: '/login', component: './user/login.js' },
-    { path: '/registed', component: './user/registed.tsx' },
+    { path: '/registed', component: './user/registed' },
     {
         path: '/',
         component: '../layouts',
         wrappers: ['@/wrappers/auth'],
-        routes: [
-            {
+        routes: [{
                 path: '/car',
-                routes: [
-                    {
+                routes: [{
                         path: '/car/index',
                         component: './car/index'
                     },
                     {
                         path: '/car/form',
                         component: './car/form'
+                    },
+                    {
+                        path: '/car/pay',
+                        component: './car/pay'
                     }
                 ]
             },
             {
                 path: '/ship',
-                routes: [
-                    {
+                routes: [{
                         path: '/ship/index',
                         component: './ship/index'
                     },
@@ -34,8 +35,7 @@ const routes = [
             },
             {
                 path: '/invoice',
-                routes: [
-                    {
+                routes: [{
                         path: '/invoice/car',
                         component: './invoice/car'
                     },
@@ -44,6 +44,9 @@ const routes = [
                         component: './invoice/ship'
                     }
                 ]
+            },
+            {
+
             }
         ]
     }
