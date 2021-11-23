@@ -4,6 +4,9 @@ import { Card, Form, Input, Button } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import styles from './login.less';
 import { connect } from 'dva';
+import md5 from 'js-md5';
+import sha1 from 'js-sha1';
+import { getRandomStr } from '../../util/tools'
 
 const namespace = 'user';
 
@@ -42,7 +45,14 @@ class Login extends React.Component {
 
     render() {
         const onFinish = (values) => {
-            this.props.doLoginFn(values);
+            let copyValues = { ...values }
+            copyValues = {
+                ...copyValues,
+                password: getRandomStr() +
+                    sha1(md5(copyValues.password.toString())) +
+                    getRandomStr()
+            }
+            this.props.doLoginFn(copyValues);
         };
         return (
             <div>
@@ -107,8 +117,8 @@ class Login extends React.Component {
                             target="_blank"
                             rel="noopener"
                         >苏公网安备 32058202010569号</a>
-                            增值电信业务经营许可证苏B1-20140002 增值电信业务经营许可证苏B2-20140003 苏ICP备12023245号-1
-                        </div>
+                        增值电信业务经营许可证苏B1-20140002 增值电信业务经营许可证苏B2-20140003 苏ICP备12023245号-1
+                    </div>
 
                 </div>
             </div>

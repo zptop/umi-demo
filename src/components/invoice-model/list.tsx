@@ -21,11 +21,9 @@ import { formatDateYMD, accMul, accDiv } from '../../util/tools';
 import { useState } from 'react';
 import { connect } from 'dva';
 const namespace = 'invoice';
-
+import PayInvoiceModal from './pay-invoice-modal';
 const mapStateToProps = state => {
-    let invoiceList = state[namespace].invoiceList,
-        totalPage = state[namespace].totalPage,
-        loading = state[namespace].loading;
+    let { invoiceList, totalPage, loading } = state[namespace];
     return {
         invoiceList,
         totalPage,
@@ -41,6 +39,12 @@ const mapDispatchToProps = dispatch => {
                 value,
             });
         },
+        getInvoicePayInfoFn: value => {
+            dispatch({
+                type: namespace + '/getInvoicePayInfoModel',
+                value
+            })
+        }
     };
 };
 
@@ -90,11 +94,24 @@ const List = props => {
                 break;
         }
     };
-    const [form] = Form.useForm();
-    //支付税金
-    const handleRowPay = () => {
 
+    //支付税金模块
+    const [isModalvisible, setIsModalvisible] = useState(false);
+    //确定
+    const handleOk = () => {
+        setIsModalvisible(false);
     };
+    //取消
+    const handleCancel = () => {
+        setIsModalvisible(false);
+    };
+    const handleRowPay = (row, index) => {
+        props.getInvoicePayInfoFn({ invoice_id: row.invoice_id })
+        setIsModalvisible(true);
+    };
+
+    const [form] = Form.useForm();
+
     const onFinish = () => { };
     const selectDate = () => { };
     const onReset = () => { };
@@ -133,7 +150,7 @@ const List = props => {
                     <div>
                         <Button
                             type="primary"
-                            disabled={invoice_editable != 1 || taxable_amount == 0}
+                            disabled={invoice_editable != 1 || taxable_amount != 0}
                             onClick={_ => handleRowPay(row, index)}
                         >
                             支付税金
@@ -358,6 +375,10 @@ const List = props => {
                     onShowSizeChange: onShowSizeChange,
                 }}
             />
+            {/*支付税金弹框*/}
+            <Modal width='740px' title="支付税金" okText="确认" cancelText="取消" visible={isModalvisible} onOk={handleOk} onCancel={handleCancel}>
+                <PayInvoiceModal />
+            </Modal>
         </div>
     );
 };
