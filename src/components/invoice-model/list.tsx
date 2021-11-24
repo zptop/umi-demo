@@ -21,13 +21,13 @@ import { formatDateYMD, accMul, accDiv } from '../../util/tools';
 import { useState } from 'react';
 import { connect } from 'dva';
 const namespace = 'invoice';
-import PayInvoiceModal from './pay-invoice-modal';
+import PayInvoiceModal from './pay-invoice-modal.js'; 
 const mapStateToProps = state => {
     let { invoiceList, totalPage, loading } = state[namespace];
     return {
         invoiceList,
         totalPage,
-        loading,
+        loading
     };
 };
 
@@ -38,12 +38,6 @@ const mapDispatchToProps = dispatch => {
                 type: namespace + '/getInvoiceListModel',
                 value,
             });
-        },
-        getInvoicePayInfoFn: value => {
-            dispatch({
-                type: namespace + '/getInvoicePayInfoModel',
-                value
-            })
         }
     };
 };
@@ -97,6 +91,7 @@ const List = props => {
 
     //支付税金模块
     const [isModalvisible, setIsModalvisible] = useState(false);
+    const [invoiceId, setInvoiceId] = useState('');
     //确定
     const handleOk = () => {
         setIsModalvisible(false);
@@ -106,8 +101,8 @@ const List = props => {
         setIsModalvisible(false);
     };
     const handleRowPay = (row, index) => {
-        props.getInvoicePayInfoFn({ invoice_id: row.invoice_id })
         setIsModalvisible(true);
+        setInvoiceId(row.invoice_id)
     };
 
     const [form] = Form.useForm();
@@ -377,7 +372,7 @@ const List = props => {
             />
             {/*支付税金弹框*/}
             <Modal width='740px' title="支付税金" okText="确认" cancelText="取消" visible={isModalvisible} onOk={handleOk} onCancel={handleCancel}>
-                <PayInvoiceModal />
+                <PayInvoiceModal invoice_id={invoiceId} />
             </Modal>
         </div>
     );

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Row, Col, Modal, Button } from 'antd';
 import { connect } from 'dva';
 const namespace = 'invoice';
@@ -9,12 +9,21 @@ const mapStateToProps = state => {
 }
 
 const mapDispatchToProps = dispatch => {
-
+    return {
+        getInvoicePayInfoFn: value => {
+            dispatch({
+                type: namespace + '/getInvoicePayInfoModel',
+                value
+            })
+        }
+    }
 }
 
 const PayInvoiceModal = props => {
-    let { payInfoObj } = props;
-
+    let { invoice_id,payInfoObj } = props;
+    useEffect(() => {
+        props.getInvoicePayInfoFn({ invoice_id })
+    },[invoice_id])
     return (
         <>
             <span>注：累计应付税金，累计应付撮合服务费按申请单中各运单应付税金及服务费进行合计</span>

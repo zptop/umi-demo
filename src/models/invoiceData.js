@@ -7,7 +7,7 @@ export default {
         invoiceList: [],
         loading: false, //列表加载状态
         totalPage: 0, //总页数
-        payInfoObj: null, //支付信息
+        payInfoObj: {}, //支付信息
     },
     //同步方法
     reducers: {
@@ -58,6 +58,7 @@ export default {
         //支付税金弹框信息
         * getInvoicePayInfoModel({ value }, { call, put }) {
             const res = yield call(getInvoicePayInfo, value);
+            console.log('res:', res)
             if (res.code == 0) {
                 yield put({
                     type: 'setPayInfoObj',
