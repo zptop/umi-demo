@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Row, Col, Modal, Button } from 'antd';
 import { connect } from 'dva';
 const namespace = 'invoice';
-
+import styles from './index.less';
 const mapStateToProps = state => {
     let { payInfoObj } = state[namespace];
     return { payInfoObj }
@@ -20,13 +20,13 @@ const mapDispatchToProps = dispatch => {
 }
 
 const PayInvoiceModal = props => {
-    let { invoice_id,payInfoObj } = props;
     useEffect(() => {
-        props.getInvoicePayInfoFn({ invoice_id })
-    },[invoice_id])
+        props.getInvoicePayInfoFn({ invoice_id: props.invoice_id })
+    }, [props.invoice_id])
+    let { payInfoObj } = props;
     return (
-        <>
-            <span>注：累计应付税金，累计应付撮合服务费按申请单中各运单应付税金及服务费进行合计</span>
+        <div className={styles.pay_info_box}>
+            <span className={styles.tips}>注：累计应付税金，累计应付撮合服务费按申请单中各运单应付税金及服务费进行合计</span>
             <Row>
                 <Col span={12}><span>开票申请单号</span>{payInfoObj.apply_invoiceno}</Col>
                 <Col span={12}><span>创建时间</span>{payInfoObj.create_time}</Col>
@@ -38,7 +38,7 @@ const PayInvoiceModal = props => {
                 <Col span={24}><span>累计撮合服务费</span>{payInfoObj.svrfee_pay_detail}</Col>
                 <Col span={24}><span>总支付金额</span>{payInfoObj.total_pay_detail}</Col>
             </Row>
-        </>
+        </div>
     )
 
 }

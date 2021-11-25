@@ -21,7 +21,7 @@ import { formatDateYMD, accMul, accDiv } from '../../util/tools';
 import { useState } from 'react';
 import { connect } from 'dva';
 const namespace = 'invoice';
-import PayInvoiceModal from './pay-invoice-modal.js'; 
+import PayInvoiceModal from './pay-invoice-modal.js';
 const mapStateToProps = state => {
     let { invoiceList, totalPage, loading } = state[namespace];
     return {
@@ -100,6 +100,7 @@ const List = props => {
     const handleCancel = () => {
         setIsModalvisible(false);
     };
+    //打开支付税金弹框
     const handleRowPay = (row, index) => {
         setIsModalvisible(true);
         setInvoiceId(row.invoice_id)
