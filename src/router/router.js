@@ -42,6 +42,14 @@ const routes = [
                     {
                         path: '/invoice/ship',
                         component: './invoice/ship'
+                    },
+                    {
+                        path: '/invoice/carDetail',
+                        component: './invoice/carDetail'
+                    },
+                    {
+                        path: '/invoice/shipDetail',
+                        component: './invoice/shipDetail'
                     }
                 ]
             },

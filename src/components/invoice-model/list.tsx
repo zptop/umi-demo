@@ -15,6 +15,7 @@ import {
     Tooltip,
     Drawer,
 } from 'antd';
+import { history } from 'umi';
 const { RangePicker } = DatePicker;
 import { RetweetOutlined, ExclamationCircleFilled } from '@ant-design/icons';
 import { formatDateYMD, accMul, accDiv } from '../../util/tools';
@@ -146,6 +147,7 @@ const List = props => {
                     <div>
                         <Button
                             type="primary"
+                            style={{marginRight:'6px'}}
                             disabled={invoice_editable != 1 || taxable_amount != 0}
                             onClick={_ => handleRowPay(row, index)}
                         >

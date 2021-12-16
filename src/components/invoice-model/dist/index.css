@@ -1,0 +1,27 @@
+.pay_info_box :global .ant-col-12,
+.pay_info_box :global .ant-col-24 {
+  height: 36px;
+  display: flex;
+  align-items: center;
+}
+.pay_info_box :global .ant-col-12 span,
+.pay_info_box :global .ant-col-24 span {
+  width: 140px;
+  color: #8691a6;
+}
+.pay_info_box :global .ant-col-12 span.ant-radio,
+.pay_info_box :global .ant-col-24 span.ant-radio,
+.pay_info_box :global .ant-col-12 span.ant-radio-inner,
+.pay_info_box :global .ant-col-24 span.ant-radio-inner {
+  width: 16px;
+}
+.pay_info_box span.tips {
+  height: 36px;
+  display: flex;
+  align-items: center;
+}
+.detail_info_title {
+  display: inline-block;
+  padding: 0 10px 0 0;
+  color: #888;
+}

@@ -67,11 +67,10 @@ export default {
     subscriptions: {
         setup({ dispatch, history }) {
             history.listen(({ pathname }) => {
-                if (pathname) {
-                    dispatch({
-                        type: 'checkLogin',
-                    });
-                }
+                console.log('pathname', pathname);
+                dispatch({
+                    type: 'checkLogin',
+                });
             });
         },
     },
