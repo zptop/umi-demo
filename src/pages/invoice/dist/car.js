@@ -28,22 +28,22 @@ var __extends =
 exports.__esModule = true;
 var react_1 = require('react');
 var list_1 = require('../../components/invoice-model/list');
-var ShipForm = /** @class */ (function(_super) {
-  __extends(ShipForm, _super);
-  function ShipForm() {
+var CarForm = /** @class */ (function(_super) {
+  __extends(CarForm, _super);
+  function CarForm() {
     return (_super !== null && _super.apply(this, arguments)) || this;
   }
-  ShipForm.prototype.render = function() {
+  CarForm.prototype.render = function() {
     return react_1['default'].createElement(
       'div',
       null,
       react_1['default'].createElement(list_1['default'], {
-        transportType: '2',
-        invoiceDetailPath: '/invoice/shipDetail',
-        formName: '/ship/form',
+        transportType: '1',
+        invoiceDetailPath: '/invoice/carDetail',
+        formName: '/car/form',
       }),
     );
   };
-  return ShipForm;
+  return CarForm;
 })(react_1['default'].Component);
-exports['default'] = ShipForm;
+exports['default'] = CarForm;

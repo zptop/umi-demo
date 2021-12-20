@@ -3,6 +3,7 @@ export default {
     //配置浏览器最低版本
     ie: 11,
   },
+  mfsu: {},
   hash: true, //开启打包文件的hash值后缀
   treeShaking: true, //去除那些引用的但却没有使用的代码
   plugins: [
