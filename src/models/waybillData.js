@@ -211,7 +211,7 @@ export default {
       };
     },
     setPayObjInfo(state, action) {
-      console.log('action:',action)
+      console.log('action:', action);
       return {
         ...state,
         payObjInfo: action.payload,
@@ -615,9 +615,9 @@ export default {
     //付款页面-获取收款人信息
     *getInfoPersonModel({ value }, { call, put }) {
       const res = yield call(getInfoPersonFromPay, value);
-      console.log('res:',res)
+      console.log('res:', res);
       if (res.code == 0) {
-        console.log('1111')
+        console.log('1111');
         yield put({
           type: '/setPayObjInfo',
           payload: res.data,

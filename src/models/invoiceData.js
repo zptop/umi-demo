@@ -3,9 +3,10 @@ import {
   getInvoicePayInfo,
   getInvoicewaybill,
   getInvoiceGetInfo,
+  removewaybill,
 } from '../sevice/invoice';
+import { message } from 'antd';
 import { formatDateYMDHMS, accDiv } from '../util/tools';
-import { history } from 'umi';
 
 export default {
   namespace: 'invoice',
@@ -129,6 +130,20 @@ export default {
           type: 'setLoadingDetail',
           payload: false,
         });
+      }
+    },
+
+    //发票详情列表行操作-移除
+    *removewaybillModel({ value }, { call, put }) {
+      const res = yield call(removewaybill, value);
+      if (res.code == 0) {
+        message.success(res.msg);
+        dispatch({
+          type: 'getInvoicewaybillModel',
+          value: { page: 1, num: 10, invoice_id: value.invoice_id },
+        });
+      } else {
+        message.warning(res.msg);
       }
     },
   },

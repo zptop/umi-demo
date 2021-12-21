@@ -951,7 +951,6 @@ const WaybillIndex = props => {
     {
       title: '运单编号',
       width: 100,
-      dataIndex: 'waybill_no',
       render: (text, row, index) => {
         return (
           <div>

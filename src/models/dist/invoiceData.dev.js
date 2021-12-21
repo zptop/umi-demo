@@ -7,9 +7,9 @@ exports['default'] = void 0;
 
 var _invoice = require('../sevice/invoice');
 
-var _tools = require('../util/tools');
+var _antd = require('antd');
 
-var _umi = require('umi');
+var _tools = require('../util/tools');
 
 function ownKeys(object, enumerableOnly) {
   var keys = Object.keys(object);
@@ -321,13 +321,52 @@ var _default = {
         },
         getInvoicewaybillModel);
       }),
+    //发票详情列表行操作-移除
+    removewaybillModel:
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function removewaybillModel(_ref9, _ref10) {
+        var value, call, put, res;
+        return regeneratorRuntime.wrap(function removewaybillModel$(_context5) {
+          while (1) {
+            switch ((_context5.prev = _context5.next)) {
+              case 0:
+                value = _ref9.value;
+                (call = _ref10.call), (put = _ref10.put);
+                _context5.next = 4;
+                return call(_invoice.removewaybill, value);
+
+              case 4:
+                res = _context5.sent;
+
+                if (res.code == 0) {
+                  _antd.message.success(res.msg);
+
+                  dispatch({
+                    type: 'getInvoicewaybillModel',
+                    value: {
+                      page: 1,
+                      num: 10,
+                      invoice_id: value.invoice_id,
+                    },
+                  });
+                } else {
+                  _antd.message.warning(res.msg);
+                }
+
+              case 6:
+              case 'end':
+                return _context5.stop();
+            }
+          }
+        }, removewaybillModel);
+      }),
   },
   subscriptions: {
-    setup: function setup(_ref9) {
-      var dispatch = _ref9.dispatch,
-        history = _ref9.history;
-      return history.listen(function(_ref10) {
-        var pathname = _ref10.pathname;
+    setup: function setup(_ref11) {
+      var dispatch = _ref11.dispatch,
+        history = _ref11.history;
+      return history.listen(function(_ref12) {
+        var pathname = _ref12.pathname;
 
         if (pathname === '/invoice/car' || pathname === '/invoice/ship') {
           dispatch({

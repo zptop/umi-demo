@@ -16,16 +16,14 @@ import {
   Tooltip,
   Drawer,
 } from 'antd';
+const { confirm } = Modal;
 import {
-  RetweetOutlined,
-  DownOutlined,
-  DownloadOutlined,
   ExclamationCircleFilled,
-  QuestionCircleOutlined,
-  CloseCircleOutlined,
-  WarningOutlined,
-  CloudSyncOutlined,
+  ExclamationCircleOutlined,
 } from '@ant-design/icons';
+import UploadRequired from '../upload-required';
+import UploadNoRequired from '../upload-no-required';
+import Details from '../waybill-model/detail';
 import styles from './index.less';
 import { history, useHistory } from 'umi';
 import { connect } from 'dva';
@@ -63,6 +61,12 @@ const mapDispatchToProps = dispatch => {
         value,
       });
     },
+    removewaybillFn: value => {
+      dispatch({
+        type: namespace + '/removewaybillModel',
+        value,
+      });
+    },
   };
 };
 
@@ -78,23 +82,85 @@ const DescriptionItem = ({ title, content }) => (
 const Detail = props => {
   const history = useHistory();
   let invoice_id = history.location.query.invoice_id;
-
-  //行操作-编辑
-  const handleRowEdit = (row, index) => {
-    let waybill_no = row.waybill_no;
-    this.$router.push({
-      name: this.formName,
-      params: {
-        waybill_no,
-      },
-    });
-  };
+  const [waybillNo, setWaybillNo] = useState('');
 
   //表格初始化状态
   const [objState, setObjState] = useState({
     pageNum: 1,
     pageSize: 10,
+    isDetailDrawer: false,
   });
+
+  //走资金-模态框控制
+  const [isRequiredModalVisible, setIsRequiredModalVisible] = useState(false);
+  const handleRequiredOk = () => {
+    setIsRequiredModalVisible(false);
+  };
+  const handleRequiredCancel = () => {
+    setIsRequiredModalVisible(false);
+  };
+
+  //不走资金-模态框控制
+  const [isNoRequiredModalVisible, setIsNoRequiredModalVisible] = useState(
+    false,
+  );
+  const handleNoRequiredOk = () => {
+    setIsNoRequiredModalVisible(false);
+  };
+  const handleNoRequiredCancel = () => {
+    setIsNoRequiredModalVisible(false);
+  };
+
+  //不走资金-关闭模态框
+  const closeModel = flag => {
+    setIsNoRequiredModalVisible(flag);
+  };
+
+  //行操作-上传资料
+  const handleRowUpload = (row, index) => {
+    if (props.userInfo.PAYMENTREQUIRED == 1) {
+      //走资金
+      setIsRequiredModalVisible(true);
+    } else {
+      //不走资金
+      setIsNoRequiredModalVisible(true);
+    }
+    setWaybillNo(row.waybill_no);
+  };
+
+  //行操作-移除
+  const handleDel = row => {
+    let { invoice_id_3, waybill_no } = row;
+    confirm({
+      icon: <ExclamationCircleOutlined />,
+      content: '是否确定移除？',
+      cancelText: '取消',
+      okText: '确定',
+      onOk() {
+        props.removewaybillFn({ invoice_id: invoice_id_3, waybill_no });
+      },
+      onCancel() {
+        console.log('Cancel');
+      },
+    });
+  };
+
+  //打开运单详情对话框
+  const openWaybillDetail = waybill_no => {
+    setObjState({
+      ...objState,
+      isDetailDrawer: true,
+    });
+    setWaybillNo(waybill_no);
+  };
+
+  //关闭运单详情抽屉
+  const onCloseDetailDrawer = () => {
+    setObjState({
+      ...objState,
+      isDetailDrawer: false,
+    });
+  };
 
   //pageSize 变化的回调
   const onShowSizeChange = (current, pageSize) => {
@@ -110,9 +176,9 @@ const Detail = props => {
     setObjState({
       ...objState,
       pageNum: page,
-      pageSize: pageSize,
+      pageSize,
     });
-    let params = { page: page, num: pageSize, invoice_id };
+    let params = { page, num: pageSize, invoice_id };
     props.getInvoicewaybillModelFn({ params });
   };
 
@@ -123,10 +189,9 @@ const Detail = props => {
 
   const columns = [
     {
-      type: 'index',
       title: '序号',
-      width: 40,
-      align: 'center',
+      render: (text, row, index) => `${index + 1}`,
+      width: 50,
     },
     {
       title: '操作',
@@ -154,7 +219,9 @@ const Detail = props => {
                           : '编辑船舶运单',
                     },
                   });
+                  setWaybillNo(waybill_no);
                 }}
+                type="primary"
                 disabled={waybill_editable != 1}
               >
                 编辑
@@ -165,11 +232,16 @@ const Detail = props => {
                 onClick={() => {
                   handleRowUpload(row, index);
                 }}
+                type="primary"
                 disabled={waybill_editable != 1}
+                style={{ marginLeft: '10px', marginRight: '10px' }}
               >
                 上传资料
               </Button>
             )}
+            <Button type="primary" onClick={() => handleDel(row)}>
+              移除
+            </Button>
           </div>
         );
       },
@@ -177,7 +249,19 @@ const Detail = props => {
     {
       title: '运单编号',
       width: 140,
-      dataIndex: 'waybill_no',
+      render: (text, row, index) => {
+        let { waybill_no } = row;
+        return (
+          <>
+            <a
+              style={{ textDecoration: 'underline' }}
+              onClick={() => openWaybillDetail(waybill_no)}
+            >
+              {waybill_no}
+            </a>
+          </>
+        );
+      },
     },
     {
       title: '审核状态',
@@ -196,11 +280,14 @@ const Detail = props => {
       render(text, row, index) {
         let { carrier_ticket_limit, carrier_name } = row;
         // let num = localRead("month_carrier_waybill_limit");
+        let num = 10;
         let tooltip = (
           <Tooltip
             placement="right"
             title={
-              '此承运人本月开票申请达到张， 本月无法开票， 请下月1日再进行开票申请'
+              '此承运人本月开票申请达到张' +
+              num +
+              '， 本月无法开票， 请下月1日再进行开票申请'
             }
           >
             <ExclamationCircleFilled />
@@ -313,7 +400,7 @@ const Detail = props => {
         dataSource={props.invoiceDetailList}
         loading={props.loadingDetail}
         rowKey={record => `${record.waybill_no}`}
-        scroll={{ x: 2100 }}
+        scroll={{ x: 2000 }}
         sticky
         pagination={{
           showQuickJumper: true,
@@ -325,7 +412,58 @@ const Detail = props => {
           onShowSizeChange: onShowSizeChange,
         }}
       />
+      {/*上传资料-走资金 */}
+      <Modal
+        title="上传资料"
+        okText="确定"
+        cancelText="关闭"
+        width={790}
+        visible={isRequiredModalVisible}
+        onOk={handleRequiredOk}
+        onCancel={handleRequiredCancel}
+        footer={[
+          <Button key="关闭" onClick={handleRequiredCancel}>
+            关闭
+          </Button>,
+        ]}
+      >
+        <UploadRequired
+          waybill_no={waybillNo}
+          transportType={props.transportType}
+        />
+      </Modal>
+
+      {/**上传资料-不走资金 */}
+      <Modal
+        title="上传资料"
+        okText="确定"
+        cancelText="关闭"
+        width={740}
+        visible={isNoRequiredModalVisible}
+        onOk={handleNoRequiredOk}
+        onCancel={handleNoRequiredCancel}
+        footer={null}
+      >
+        <UploadNoRequired
+          waybill_no={waybillNo}
+          transportType={props.transportType}
+          closeModelFromChild={closeModel}
+        />
+      </Modal>
+
+      {/*运单详情*/}
+      <Drawer
+        title="运单详情"
+        placement="right"
+        width={986}
+        closable={false}
+        onClose={onCloseDetailDrawer}
+        visible={objState.isDetailDrawer}
+      >
+        <Details waybill_no={waybillNo} />
+      </Drawer>
     </>
   );
 };
-export default connect(mapStateToProps, mapDispatchToProps)(Detail);
+const memoDetail = React.memo(Detail);
+export default connect(mapStateToProps, mapDispatchToProps)(memoDetail);
