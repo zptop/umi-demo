@@ -21,6 +21,7 @@ import {
   ExclamationCircleFilled,
   ExclamationCircleOutlined,
 } from '@ant-design/icons';
+import { formatDateYMD, accMul, accDiv } from '../../util/tools';
 import UploadRequired from '../upload-required';
 import UploadNoRequired from '../upload-no-required';
 import Details from '../waybill-model/detail';
@@ -267,7 +268,47 @@ const Detail = props => {
       title: '审核状态',
       width: 100,
       dataIndex: 'pending_status_desc',
-      slot: 'action3',
+      render: (text, row, index) => {
+        let {
+          invoice_status,
+          waybill_status,
+          waybill_status_text,
+          audit_fail_reason_desc,
+          waybill_no,
+        } = row;
+        let html;
+        if (invoice_status == 40 && waybill_status == 200) {
+          html = (
+            <div>
+              <span style={{ color: '#f00' }}>{waybill_status_text}</span>
+              {invoice_status == 40 && (
+                <Tooltip placement="right" title={audit_fail_reason_desc}>
+                  <ExclamationCircleFilled />
+                </Tooltip>
+              )}
+              <div>
+                <div>{audit_fail_reason_desc}</div>
+                <div>
+                  <Button
+                    type="primary"
+                    size="small"
+                    style={{
+                      height: 'auto',
+                      color: '#fff',
+                    }}
+                    onClick={() => handleWaybillStatus(waybill_no)}
+                  >
+                    已处理
+                  </Button>
+                </div>
+              </div>
+            </div>
+          );
+        } else {
+          html = waybill_status_text;
+        }
+        return <div>{html}</div>;
+      },
     },
     {
       title: '货物名称',
@@ -309,32 +350,50 @@ const Detail = props => {
     {
       title: '提货时间',
       width: 100,
-      dataIndex: 'load_time',
+      render: (text, row, index) => {
+        let { load_time } = row;
+        return <div>{formatDateYMD(load_time)}</div>;
+      },
     },
     {
       title: '到货时间',
       width: 100,
-      dataIndex: 'unload_time',
+      render: (text, row, index) => {
+        let { unload_time } = row;
+        return <div>{formatDateYMD(unload_time)}</div>;
+      },
     },
     {
       title: '运费(元)',
       width: 100,
-      dataIndex: 'labour_amount',
+      render: (text, row, index) => {
+        let { labour_amount } = row;
+        return <div>{accDiv(labour_amount, 100).toFixed(2)}</div>;
+      },
     },
     {
       title: '含税开票总金额(元)',
       width: 120,
-      dataIndex: 'invoice_amount',
+      render: (text, row, index) => {
+        let { invoice_amount } = row;
+        return <div>{accDiv(invoice_amount, 100).toFixed(2)}</div>;
+      },
     },
     {
       title: '撮合服务费(元)',
       width: 100,
-      dataIndex: 'svr_fee',
+      render: (text, row, index) => {
+        let { svr_fee } = row;
+        return <div>{accDiv(svr_fee, 100).toFixed(2)}</div>;
+      },
     },
     {
       title: '应付税金',
       width: 100,
-      dataIndex: 'taxable_amount',
+      render: (text, row, index) => {
+        let { taxable_amount } = row;
+        return <div>{accDiv(taxable_amount, 100).toFixed(2)}</div>;
+      },
     },
     {
       title: '发票状态',
