@@ -284,17 +284,18 @@ var _default = {
                 value = _ref7.value;
                 (call = _ref8.call), (put = _ref8.put);
                 _context4.next = 4;
-                return call(_invoice.getInvoicewaybill, value);
-
-              case 4:
-                res = _context4.sent;
-                _context4.next = 7;
                 return put({
                   type: 'setLoadingDetail',
                   payload: true,
                 });
 
-              case 7:
+              case 4:
+                _context4.next = 6;
+                return call(_invoice.getInvoicewaybill, value);
+
+              case 6:
+                res = _context4.sent;
+
                 if (!(res.code == 0)) {
                   _context4.next = 12;
                   break;

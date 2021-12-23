@@ -130,6 +130,7 @@ const WaybillIndex = props => {
   } = props;
   const [form] = Form.useForm();
   const [payFormData] = Form.useForm();
+  const dataRef = useRef();
 
   //表格初始化状态
   const [objState, setObjState] = useState({
@@ -250,9 +251,6 @@ const WaybillIndex = props => {
     getBtnText: '获取验证码',
     is_sms_disabled: false, //获取短信验证码点击
   });
-
-  //搜索
-  const [copySubmitData, setCopySubmitData] = useState({});
 
   //初始化批量付款弹窗
   const initPayment = () => {
@@ -556,9 +554,8 @@ const WaybillIndex = props => {
       num: objState.pageSize,
       transportType,
     };
-    formatSelectedOptions(values);
-    setCopySubmitData(values);
-    props.getWaybillListFn(values);
+    dataRef.current = formatSelectedOptions(values);
+    props.getWaybillListFn(dataRef.current);
   };
   //重置
   const onReset = () => {
@@ -598,6 +595,9 @@ const WaybillIndex = props => {
       pageNum: current,
       pageSize: pageSize,
     });
+    let params = { page: page, num: pageSize, transportType };
+    let data = { ...dataRef.current, ...params };
+    props.getWaybillListFn(data);
   };
 
   //分页
@@ -608,7 +608,8 @@ const WaybillIndex = props => {
       pageSize: pageSize,
     });
     let params = { page: page, num: pageSize, transportType };
-    props.getWaybillListFn(params);
+    let data = { ...dataRef.current, ...params };
+    props.getWaybillListFn(data);
   };
 
   //运单列表->更多操作

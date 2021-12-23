@@ -58,7 +58,7 @@ function getInvoicePayInfo(params) {
     }
   });
 }
-/*发票申请详情列表*/
+/**发票申请详情列表*/
 
 function getInvoicewaybill(params) {
   return regeneratorRuntime.async(function getInvoicewaybill$(_context3) {
@@ -80,7 +80,7 @@ function getInvoicewaybill(params) {
     }
   });
 }
-/*获取支付税金详情信息*/
+/**获取支付税金详情信息*/
 
 function getInvoiceGetInfo(params) {
   return regeneratorRuntime.async(function getInvoiceGetInfo$(_context4) {
@@ -102,7 +102,7 @@ function getInvoiceGetInfo(params) {
     }
   });
 }
-/*运单详情行操作-移除 */
+/**运单详情行操作-移除 */
 
 function removewaybill(params) {
   return regeneratorRuntime.async(function removewaybill$(_context5) {
@@ -124,3 +124,4 @@ function removewaybill(params) {
     }
   });
 }
+/**发票详情列表-搜索*/

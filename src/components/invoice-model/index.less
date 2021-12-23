@@ -1,6 +1,5 @@
 .pay_info_box {
   :global {
-
     .ant-col-12,
     .ant-col-24 {
       height: 36px;
@@ -11,7 +10,8 @@
         width: 140px;
         color: rgb(134, 145, 166);
 
-        &.ant-radio,&.ant-radio-inner {
+        &.ant-radio,
+        &.ant-radio-inner {
           width: 16px;
         }
       }
@@ -23,6 +23,33 @@
       height: 36px;
       display: flex;
       align-items: center;
+    }
+  }
+}
+
+.search_box {
+  padding: 10px 0;
+
+  form {
+    width: 100%;
+    display: flex;
+    :global {
+      span {
+        &.ant-input-group-addon {
+          width: 50%;
+        }
+      }
+      .ant-col-3 {
+        padding: 0 5px !important;
+      }
+
+      .ant-col-13 {
+        text-align: right;
+
+        button {
+          margin-left: 5px;
+        }
+      }
     }
   }
 }

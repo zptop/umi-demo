@@ -161,14 +161,9 @@ var _default = {
         total_labour_amount: obj.total_labour_amount,
       });
     },
-    setLoadingTrue: function setLoadingTrue(state) {
+    setLoading: function setLoading(state, action) {
       return _objectSpread({}, state, {
-        loading: true,
-      });
-    },
-    setLoadingFalse: function setLoadingFalse(state) {
-      return _objectSpread({}, state, {
-        loading: false,
+        loading: action.payload,
       });
     },
     setCommonInfo: function setCommonInfo(state, result) {
@@ -301,7 +296,8 @@ var _default = {
                 (call = _ref2.call), (put = _ref2.put);
                 _context.next = 4;
                 return put({
-                  type: 'setLoadingTrue',
+                  type: 'setLoading',
+                  payload: true,
                 });
 
               case 4:
@@ -322,7 +318,8 @@ var _default = {
 
                 _context.next = 10;
                 return put({
-                  type: 'setLoadingFalse',
+                  type: 'setLoading',
+                  payload: false,
                 });
 
               case 10:

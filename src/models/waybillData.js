@@ -72,16 +72,10 @@ export default {
         total_labour_amount: obj.total_labour_amount,
       };
     },
-    setLoadingTrue(state) {
+    setLoading(state, action) {
       return {
         ...state,
-        loading: true,
-      };
-    },
-    setLoadingFalse(state) {
-      return {
-        ...state,
-        loading: false,
+        loading: action.payload,
       };
     },
     setCommonInfo(state, result) {
@@ -223,7 +217,8 @@ export default {
     //获取运单列表
     *getWaybillListModel({ value }, { call, put }) {
       yield put({
-        type: 'setLoadingTrue',
+        type: 'setLoading',
+        payload: true,
       });
       const res = yield call(
         getWaybillList,
@@ -232,7 +227,8 @@ export default {
       );
       if (res.code == 0) {
         yield put({
-          type: 'setLoadingFalse',
+          type: 'setLoading',
+          payload: false,
         });
         yield put({
           type: 'setWaybillList',

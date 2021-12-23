@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Row,
   Col,
@@ -20,11 +20,18 @@ const { confirm } = Modal;
 import {
   ExclamationCircleFilled,
   ExclamationCircleOutlined,
+  DownSquareOutlined,
 } from '@ant-design/icons';
-import { formatDateYMD, accMul, accDiv } from '../../util/tools';
+import {
+  formatDateYMD,
+  accMul,
+  accDiv,
+  formatSelectedOptions,
+} from '../../util/tools';
 import UploadRequired from '../upload-required';
 import UploadNoRequired from '../upload-no-required';
 import Details from '../waybill-model/detail';
+import PayInvoiceModal from './pay-invoice-modal';
 import styles from './index.less';
 import { history, useHistory } from 'umi';
 import { connect } from 'dva';
@@ -83,14 +90,83 @@ const DescriptionItem = ({ title, content }) => (
 const Detail = props => {
   const history = useHistory();
   let invoice_id = history.location.query.invoice_id;
+  const [form] = Form.useForm();
   const [waybillNo, setWaybillNo] = useState('');
-
+  const dataRef = useRef();
+  const [placeholderInput, setPlaceholderInput] = useState('请输入运单编号');
   //表格初始化状态
   const [objState, setObjState] = useState({
     pageNum: 1,
     pageSize: 10,
+    searchName: 'waybill_no',
     isDetailDrawer: false,
   });
+
+  //选择单号
+  const selectedNo = value => {
+    switch (value * 1) {
+      case 0:
+        setObjState({
+          ...objState,
+          searchName: 'waybill_no',
+        });
+        setPlaceholderInput('请输入运单编号');
+        break;
+      case 1:
+        setObjState({
+          ...objState,
+          searchName: 'apply_no_3th',
+        });
+        setPlaceholderInput('请输入客户销项发票单号');
+        break;
+    }
+  };
+
+  //选择运单号、客户销项发票单号
+  const numSelector = (
+    <Select defaultValue="0" onChange={selectedNo} style={{ width: '100%' }}>
+      <Select.Option value="0">运单编号</Select.Option>
+      <Select.Option value="1">客户销项发票单号</Select.Option>
+    </Select>
+  );
+
+  //搜索
+  const onFinish = values => {
+    console.log('values:', values);
+    values = {
+      ...values,
+      page: objState.pageNum,
+      num: objState.pageSize,
+    };
+    dataRef.current = formatSelectedOptions(values);
+    props.getInvoicewaybillModelFn(dataRef.current);
+  };
+
+  //重置
+  const handleSearchReset = () => {
+    form.resetFields();
+    props.getInvoicewaybillModelFn({
+      page: objState.pageNum,
+      num: objState.pageSize,
+      invoice_id,
+    });
+  };
+
+  //支付税金模块
+  const [isModalvisible, setIsModalvisible] = useState(false);
+  //确定
+  const handleOk = () => {
+    setIsModalvisible(false);
+  };
+  //取消
+  const handleCancel = () => {
+    setIsModalvisible(false);
+  };
+
+  //打开支付税金弹窗
+  const handleRowPay = () => {
+    setIsModalvisible(true);
+  };
 
   //走资金-模态框控制
   const [isRequiredModalVisible, setIsRequiredModalVisible] = useState(false);
@@ -170,6 +246,9 @@ const Detail = props => {
       pageNum: current,
       pageSize: pageSize,
     });
+    let params = { page, num: pageSize };
+    let data = { ...params, ...dataRef.current };
+    props.getInvoicewaybillModelFn(data);
   };
 
   //分页
@@ -179,13 +258,15 @@ const Detail = props => {
       pageNum: page,
       pageSize,
     });
-    let params = { page, num: pageSize, invoice_id };
-    props.getInvoicewaybillModelFn({ params });
+    let params = { page, num: pageSize };
+    let data = { ...params, ...dataRef.current };
+    props.getInvoicewaybillModelFn(data);
   };
 
   useEffect(() => {
     props.getInvoiceGetInfoFn({ invoice_id });
-    props.getInvoicewaybillModelFn({ invoice_id });
+    let params = { page: 1, num: 10, invoice_id };
+    props.getInvoicewaybillModelFn(params);
   }, [invoice_id]);
 
   const columns = [
@@ -414,13 +495,13 @@ const Detail = props => {
         <Col span={6}>
           <DescriptionItem
             title="创建时间"
-            content={props.applyTitleInfo.create_time}
+            content={formatDateYMD(props.applyTitleInfo.create_time)}
           />
         </Col>
         <Col span={6}>
           <DescriptionItem
             title="累计应付税金"
-            content={props.applyTitleInfo.taxable_amount}
+            content={props.applyTitleInfo.taxable_amount / 100}
           />
         </Col>
         <Col span={6}>
@@ -432,7 +513,7 @@ const Detail = props => {
         <Col span={6}>
           <DescriptionItem
             title="含税开票总金额"
-            content={props.applyTitleInfo.invoice_amount}
+            content={props.applyTitleInfo.invoice_amount / 100}
           />
         </Col>
         <Col span={6}>
@@ -454,6 +535,71 @@ const Detail = props => {
           />
         </Col>
       </Row>
+
+      <Row
+        gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}
+        className={styles.search_box}
+      >
+        <Form
+          form={form}
+          onFinish={onFinish}
+          initialValues={{
+            invoice_id,
+            waybill_status: '',
+            waybill_no: '',
+            apply_no_3th: '',
+          }}
+        >
+          <Col span={5}>
+            <Form.Item name={objState.searchName}>
+              <Input
+                addonBefore={numSelector}
+                style={{ width: '100%' }}
+                placeholder={placeholderInput}
+              />
+            </Form.Item>
+            <Form.Item hidden name="invoice_id">
+              <Input />
+            </Form.Item>
+          </Col>
+          <Col span={3}>
+            <Form.Item name="waybill_status">
+              <Select defaultValue="100" style={{ width: '100%' }}>
+                <Select.Option value="100">选择审核状态</Select.Option>
+                <Select.Option value="200">全部</Select.Option>
+                <Select.Option value="2">审核通过</Select.Option>
+                <Select.Option value="3">审核不通过</Select.Option>
+              </Select>
+            </Form.Item>
+          </Col>
+          <Col span={3}>
+            <Button type="primary" htmlType="submit">
+              搜索
+            </Button>
+            <Button htmlType="button" onClick={handleSearchReset}>
+              重置
+            </Button>
+          </Col>
+          <Col span={13}>
+            {props.applyTitleInfo.invoice_editable == 1 && (
+              <Button type="primary" onClick={handleRowPay}>
+                支付税金
+              </Button>
+            )}
+            {props.applyTitleInfo.invoice_editable == 1 && (
+              <Button type="primary">添加运单</Button>
+            )}
+            <Button type="primary" icon={<DownSquareOutlined />}>
+              导出
+            </Button>
+            <Button type="primary" icon={<DownSquareOutlined />}>
+              导出任务
+            </Button>
+            <Button>返回列表</Button>
+          </Col>
+        </Form>
+      </Row>
+
       <Table
         columns={columns}
         dataSource={props.invoiceDetailList}
@@ -521,6 +667,18 @@ const Detail = props => {
       >
         <Details waybill_no={waybillNo} />
       </Drawer>
+      {/*支付税金弹框*/}
+      <Modal
+        width="740px"
+        title="支付税金"
+        okText="确认"
+        cancelText="取消"
+        visible={isModalvisible}
+        onOk={handleOk}
+        onCancel={handleCancel}
+      >
+        <PayInvoiceModal invoice_id={invoice_id} />
+      </Modal>
     </>
   );
 };

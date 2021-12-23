@@ -116,11 +116,11 @@ export default {
     },
     //发票申请详情列表
     *getInvoicewaybillModel({ value }, { call, put }) {
-      const res = yield call(getInvoicewaybill, value);
       yield put({
         type: 'setLoadingDetail',
         payload: true,
       });
+      const res = yield call(getInvoicewaybill, value);
       if (res.code == 0) {
         yield put({
           type: 'setInvoicewaybill',
