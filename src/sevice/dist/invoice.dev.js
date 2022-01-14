@@ -8,6 +8,7 @@ exports.getInvoicePayInfo = getInvoicePayInfo;
 exports.getInvoicewaybill = getInvoicewaybill;
 exports.getInvoiceGetInfo = getInvoiceGetInfo;
 exports.removewaybill = removewaybill;
+exports.waybilloutexport = waybilloutexport;
 
 var _request = _interopRequireDefault(require('../util/request'));
 
@@ -124,4 +125,25 @@ function removewaybill(params) {
     }
   });
 }
-/**发票详情列表-搜索*/
+/**发票详情列表-导出*/
+
+function waybilloutexport(params) {
+  return regeneratorRuntime.async(function waybilloutexport$(_context6) {
+    while (1) {
+      switch ((_context6.prev = _context6.next)) {
+        case 0:
+          return _context6.abrupt(
+            'return',
+            (0, _request['default'])('/invoice/waybilloutexport', {
+              method: 'GET',
+              params: params,
+            }),
+          );
+
+        case 1:
+        case 'end':
+          return _context6.stop();
+      }
+    }
+  });
+}

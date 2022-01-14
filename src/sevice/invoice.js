@@ -40,4 +40,10 @@ export async function removewaybill(params) {
   });
 }
 
-/**发票详情列表-搜索*/
+/**发票详情列表-导出*/
+export async function waybilloutexport(params) {
+  return request('/invoice/waybilloutexport', {
+    method: 'GET',
+    params,
+  });
+}

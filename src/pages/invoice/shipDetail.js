@@ -2,7 +2,11 @@ import Detail from '../../components/invoice-model/detail.js';
 const ShipDetail = () => {
   return (
     <>
-      <Detail transportType="2" formName="/ship/form" />
+      <Detail
+        transport_type="2"
+        formName="/ship/form"
+        exportWaybillType="300102"
+      />
     </>
   );
 };

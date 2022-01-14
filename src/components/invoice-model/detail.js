@@ -32,6 +32,7 @@ import UploadRequired from '../upload-required';
 import UploadNoRequired from '../upload-no-required';
 import Details from '../waybill-model/detail';
 import PayInvoiceModal from './pay-invoice-modal';
+import ExportList from '../waybill-model/export-list';
 import styles from './index.less';
 import { history, useHistory } from 'umi';
 import { connect } from 'dva';
@@ -75,6 +76,12 @@ const mapDispatchToProps = dispatch => {
         value,
       });
     },
+    waybilloutexportFn: value => {
+      dispatch({
+        type: namespace + '/waybilloutexportModel',
+        value,
+      });
+    },
   };
 };
 
@@ -89,7 +96,12 @@ const DescriptionItem = ({ title, content }) => (
 
 const Detail = props => {
   const history = useHistory();
-  let invoice_id = history.location.query.invoice_id;
+  let {
+    location: {
+      query: { invoice_id },
+    },
+  } = history;
+  let { transport_type, exportWaybillType } = props;
   const [form] = Form.useForm();
   const [waybillNo, setWaybillNo] = useState('');
   const dataRef = useRef();
@@ -222,6 +234,27 @@ const Detail = props => {
     });
   };
 
+  //导出
+  const handleExport = () => {
+    let params = {
+      page: objState.pageNum,
+      num: objState.pageSize,
+      invoice_id,
+      transport_type,
+    };
+    let data = { ...params, ...dataRef.current };
+    props.waybilloutexportFn(data);
+  };
+
+  //导出任务
+  const [exportListFlag, setExportListFlag] = useState(false);
+  const handleExportTaskOpen = () => {
+    setExportListFlag(true);
+  };
+  const handleExportTaskClose = () => {
+    setExportListFlag(false);
+  };
+
   //打开运单详情对话框
   const openWaybillDetail = waybill_no => {
     setObjState({
@@ -280,12 +313,7 @@ const Detail = props => {
       width: 254,
       align: 'center',
       render: (text, row, index) => {
-        let {
-          waybill_no,
-          waybill_editable,
-          invoice_status,
-          carrier_ticket_limit,
-        } = row;
+        let { waybill_no, waybill_editable } = row;
         return (
           <div>
             {props.userInfo.FROMAPI == 0 && (
@@ -589,10 +617,18 @@ const Detail = props => {
             {props.applyTitleInfo.invoice_editable == 1 && (
               <Button type="primary">添加运单</Button>
             )}
-            <Button type="primary" icon={<DownSquareOutlined />}>
+            <Button
+              type="primary"
+              icon={<DownSquareOutlined />}
+              onClick={handleExport}
+            >
               导出
             </Button>
-            <Button type="primary" icon={<DownSquareOutlined />}>
+            <Button
+              type="primary"
+              icon={<DownSquareOutlined />}
+              onClick={handleExportTaskOpen}
+            >
               导出任务
             </Button>
             <Button>返回列表</Button>
@@ -678,6 +714,19 @@ const Detail = props => {
         onCancel={handleCancel}
       >
         <PayInvoiceModal invoice_id={invoice_id} />
+      </Modal>
+      {/*导出列表*/}
+      <Modal
+        title="导出列表"
+        width={800}
+        visible={exportListFlag}
+        onCancel={handleExportTaskClose}
+        footer={null}
+      >
+        <ExportList
+          exportListFlag={exportListFlag}
+          exportWaybillType={exportWaybillType}
+        />
       </Modal>
     </>
   );

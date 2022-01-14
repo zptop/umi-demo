@@ -4,6 +4,7 @@ import {
   getInvoicewaybill,
   getInvoiceGetInfo,
   removewaybill,
+  waybilloutexport,
 } from '../sevice/invoice';
 import { message } from 'antd';
 import { formatDateYMDHMS, accDiv } from '../util/tools';
@@ -144,6 +145,16 @@ export default {
         });
       } else {
         message.warning(res.msg);
+      }
+    },
+
+    //发票详情列表-导出
+    *waybilloutexportModel({ value }, { call, put }) {
+      const res = yield call(waybilloutexport, value);
+      if (res.code == 0) {
+        message.success(res.msg);
+      } else {
+        message.success(res.msg || '操作失败');
       }
     },
   },

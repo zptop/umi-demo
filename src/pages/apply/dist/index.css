@@ -1,0 +1,24 @@
+.search_box {
+  padding: 10px 0;
+}
+.search_box form {
+  width: 100%;
+  display: flex;
+}
+.search_box form :global span.ant-input-group-addon {
+  width: 50%;
+}
+.search_box form :global .ant-col-3 {
+  padding: 0 5px !important;
+}
+.search_box form :global .ant-col-16 {
+  text-align: right;
+}
+.search_box form :global .ant-col-16 button {
+  margin-left: 5px;
+}
+.detail_info_title {
+  display: inline-block;
+  padding: 0 10px 0 0;
+  color: #888;
+}

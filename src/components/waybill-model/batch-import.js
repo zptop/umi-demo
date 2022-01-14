@@ -222,5 +222,5 @@ const BatchImport = props => {
     </div>
   );
 };
-
-export default connect(mapStateToProps, mapDispatchToProps)(BatchImport);
+const memoBatchImport = React.memo(BatchImport);
+export default connect(mapStateToProps, mapDispatchToProps)(memoBatchImport);

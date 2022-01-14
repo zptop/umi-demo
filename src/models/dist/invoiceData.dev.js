@@ -361,13 +361,46 @@ var _default = {
           }
         }, removewaybillModel);
       }),
+    //发票详情列表-导出
+    waybilloutexportModel:
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function waybilloutexportModel(_ref11, _ref12) {
+        var value, call, put, res;
+        return regeneratorRuntime.wrap(function waybilloutexportModel$(
+          _context6,
+        ) {
+          while (1) {
+            switch ((_context6.prev = _context6.next)) {
+              case 0:
+                value = _ref11.value;
+                (call = _ref12.call), (put = _ref12.put);
+                _context6.next = 4;
+                return call(_invoice.waybilloutexport, value);
+
+              case 4:
+                res = _context6.sent;
+
+                if (res.code == 0) {
+                  _antd.message.success(res.msg);
+                } else {
+                  _antd.message.success(res.msg || '操作失败');
+                }
+
+              case 6:
+              case 'end':
+                return _context6.stop();
+            }
+          }
+        },
+        waybilloutexportModel);
+      }),
   },
   subscriptions: {
-    setup: function setup(_ref11) {
-      var dispatch = _ref11.dispatch,
-        history = _ref11.history;
-      return history.listen(function(_ref12) {
-        var pathname = _ref12.pathname;
+    setup: function setup(_ref13) {
+      var dispatch = _ref13.dispatch,
+        history = _ref13.history;
+      return history.listen(function(_ref14) {
+        var pathname = _ref14.pathname;
 
         if (pathname === '/invoice/car' || pathname === '/invoice/ship') {
           dispatch({
