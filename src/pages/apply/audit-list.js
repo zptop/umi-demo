@@ -49,7 +49,6 @@ const mapDispatchToProps = dispatch => {
 };
 
 const AuditList = props => {
-  console.log('props:', props);
   let { loading, totalPage, flag } = props;
   const [form] = Form.useForm();
   const [waybillNo, setWaybillNo] = useState('');
@@ -117,7 +116,6 @@ const AuditList = props => {
 
   //搜索
   const onFinish = values => {
-    console.log('values:', values);
     values = {
       ...values,
       page: objState.pageNum,
@@ -312,7 +310,7 @@ const AuditList = props => {
         columns={columns}
         dataSource={props['audit_' + flag]}
         loading={loading}
-        rowKey={record => `${record.waybill_no}`}
+        rowKey={record => `${record.applypay_no}`}
         sticky
         pagination={{
           showQuickJumper: true,
