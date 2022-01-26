@@ -7,3 +7,11 @@ export async function paymentRequestList(params, url) {
     params,
   });
 }
+
+/**付款申请跟踪 */
+export async function paymentHistoryList(params) {
+  return request('/apply/history_list', {
+    method: 'GET',
+    params,
+  });
+}

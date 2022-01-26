@@ -17,6 +17,12 @@
 .search_box form :global .ant-col-16 button {
   margin-left: 5px;
 }
+.search_box form :global .ant-col-7 {
+  text-align: right;
+}
+.search_box form :global .ant-col-4 {
+  padding-left: 0 !important;
+}
 .detail_info_title {
   display: inline-block;
   padding: 0 10px 0 0;

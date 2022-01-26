@@ -67,7 +67,9 @@ var _default = {
     //列表
     loading: false,
     //列表加载状态
-    totalPage: 0, //总页数
+    totalPage: 0,
+    //总页数,
+    audit_history_list: [], //付款申请跟踪列表
   },
   reducers: {
     //loading状态
@@ -101,6 +103,15 @@ var _default = {
         total = _action$payload3.total;
       return _objectSpread({}, state, {
         audit_special_list: data,
+        totalPage: total,
+      });
+    },
+    set_history_list: function set_history_list(state, action) {
+      var _action$payload4 = action.payload,
+        data = _action$payload4.data,
+        total = _action$payload4.total;
+      return _objectSpread({}, state, {
+        audit_history_list: data,
         totalPage: total,
       });
     },
@@ -174,6 +185,63 @@ var _default = {
           }
         },
         getPaymentRequestListModel);
+      }),
+    //付款申请跟踪
+    paymentHistoryListModel:
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function paymentHistoryListModel(_ref3, _ref4) {
+        var value, call, put, res;
+        return regeneratorRuntime.wrap(function paymentHistoryListModel$(
+          _context2,
+        ) {
+          while (1) {
+            switch ((_context2.prev = _context2.next)) {
+              case 0:
+                value = _ref3.value;
+                (call = _ref4.call), (put = _ref4.put);
+                _context2.next = 4;
+                return put({
+                  type: 'setLoading',
+                  payload: true,
+                });
+
+              case 4:
+                _context2.next = 6;
+                return call(_audit.paymentHistoryList, value);
+
+              case 6:
+                res = _context2.sent;
+
+                if (!(res.code == 0)) {
+                  _context2.next = 13;
+                  break;
+                }
+
+                _context2.next = 10;
+                return put({
+                  type: 'setLoading',
+                  payload: false,
+                });
+
+              case 10:
+                if (!(res.data && res.data.length)) {
+                  _context2.next = 13;
+                  break;
+                }
+
+                _context2.next = 13;
+                return put({
+                  type: 'set_history_list',
+                  payload: res,
+                });
+
+              case 13:
+              case 'end':
+                return _context2.stop();
+            }
+          }
+        },
+        paymentHistoryListModel);
       }),
   },
   subscriptions: {},

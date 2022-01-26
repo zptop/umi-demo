@@ -4,6 +4,7 @@ Object.defineProperty(exports, '__esModule', {
   value: true,
 });
 exports.paymentRequestList = paymentRequestList;
+exports.paymentHistoryList = paymentHistoryList;
 
 var _request = _interopRequireDefault(require('../util/request'));
 
@@ -28,6 +29,28 @@ function paymentRequestList(params, url) {
         case 1:
         case 'end':
           return _context.stop();
+      }
+    }
+  });
+}
+/**付款申请跟踪 */
+
+function paymentHistoryList(params) {
+  return regeneratorRuntime.async(function paymentHistoryList$(_context2) {
+    while (1) {
+      switch ((_context2.prev = _context2.next)) {
+        case 0:
+          return _context2.abrupt(
+            'return',
+            (0, _request['default'])('/apply/history_list', {
+              method: 'GET',
+              params: params,
+            }),
+          );
+
+        case 1:
+        case 'end':
+          return _context2.stop();
       }
     }
   });

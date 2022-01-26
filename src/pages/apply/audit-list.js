@@ -299,10 +299,12 @@ const AuditList = props => {
               重置
             </Button>
           </Col>
-          <Col span={16}>
-            <Button type="primary">审核通过</Button>
-            <Button>审核不通过</Button>
-          </Col>
+          {props.flag == 'wait_list' && (
+            <Col span={16}>
+              <Button type="primary">审核通过</Button>
+              <Button>审核不通过</Button>
+            </Col>
+          )}
         </Form>
       </Row>
 

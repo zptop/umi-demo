@@ -1,4 +1,4 @@
-import { paymentRequestList } from '../sevice/audit';
+import { paymentRequestList, paymentHistoryList } from '../sevice/audit';
 
 export default {
   namespace: 'audit',
@@ -7,7 +7,8 @@ export default {
     audit_finish_list: [], //列表
     audit_special_list: [], //列表
     loading: false, //列表加载状态
-    totalPage: 0, //总页数
+    totalPage: 0, //总页数,
+    audit_history_list: [], //付款申请跟踪列表
   },
   reducers: {
     //loading状态
@@ -49,6 +50,16 @@ export default {
         totalPage: total,
       };
     },
+    set_history_list(state, action) {
+      let {
+        payload: { data, total },
+      } = action;
+      return {
+        ...state,
+        audit_history_list: data,
+        totalPage: total,
+      };
+    },
   },
   effects: {
     //列表
@@ -63,6 +74,17 @@ export default {
             type: 'set_' + value.flag,
             payload: { ...res },
           });
+        }
+      }
+    },
+    //付款申请跟踪
+    *paymentHistoryListModel({ value }, { call, put }) {
+      yield put({ type: 'setLoading', payload: true });
+      const res = yield call(paymentHistoryList, value);
+      if (res.code == 0) {
+        yield put({ type: 'setLoading', payload: false });
+        if (res.data && res.data.length) {
+          yield put({ type: 'set_history_list', payload: res });
         }
       }
     },
